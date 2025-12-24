@@ -1,6 +1,11 @@
 <div class="sidebar p-3">
     <h5 class="text-white mb-4">Master Data KPI</h5>
 
+    <a href="{{ route('master.dashboard') }}"
+       class="{{ request()->routeIs('master.dashboard') ? 'active' : '' }}">
+        Dashboard
+    </a>
+
     <a href="{{ route('master.departments.index') }}"
        class="{{ request()->is('master/departments*') ? 'active' : '' }}">
         Departments
