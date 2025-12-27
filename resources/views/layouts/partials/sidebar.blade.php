@@ -1,23 +1,60 @@
-<div class="sidebar p-3">
-    <h5 class="text-white mb-4">Master Data KPI</h5>
+<nav class="sidebar p-3">
 
-    <a href="{{ route('master.dashboard') }}"
-       class="{{ request()->routeIs('master.dashboard') ? 'active' : '' }}">
-        Dashboard
-    </a>
+    <div class="sidebar-header mb-4">
+        <h5 class="text-white mb-0">Master Data</h5>
+        <small class="text-muted">SSOT Control</small>
+    </div>
 
-    <a href="{{ route('master.departments.index') }}"
-       class="{{ request()->is('master/departments*') ? 'active' : '' }}">
-        Departments
-    </a>
+    <ul class="nav flex-column">
 
-    <a href="{{ route('master.lines.index') }}"
-       class="{{ request()->is('master/lines*') ? 'active' : '' }}">
-        Lines
-    </a>
+        <li class="nav-item">
+            <a href="{{ route('master.dashboard') }}"
+               class="nav-link {{ request()->routeIs('master.dashboard') ? 'active' : '' }}">
+                Dashboard
+            </a>
+        </li>
 
-    <a href="{{ route('master.machines.index') }}"
-       class="{{ request()->is('master/machines*') ? 'active' : '' }}">
-        Machines
-    </a>
-</div>
+        <li class="nav-item">
+            <a href="{{ route('master.departments.index') }}"
+               class="nav-link {{ request()->routeIs('master.departments.*') ? 'active' : '' }}">
+                Departments
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('master.lines.index') }}"
+               class="nav-link {{ request()->routeIs('master.lines.*') ? 'active' : '' }}">
+                Lines
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('master.machines.index') }}"
+               class="nav-link {{ request()->routeIs('master.machines.*') ? 'active' : '' }}">
+                Machines
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('master.items.index') }}"
+               class="nav-link {{ request()->routeIs('master.items.*') ? 'active' : '' }}">
+                Items
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('master.operators.index') }}"
+               class="nav-link {{ request()->routeIs('master.operators.*') ? 'active' : '' }}">
+                Operators
+            </a>
+        </li>
+
+        <li class="nav-item mt-3">
+            <a href="{{ route('master.audit-logs.index') }}"
+               class="nav-link {{ request()->routeIs('master.audit-logs.*') ? 'active' : '' }}">
+                Audit Log
+            </a>
+        </li>
+
+    </ul>
+</nav>

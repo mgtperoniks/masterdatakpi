@@ -11,6 +11,10 @@ use App\Http\Controllers\Master\DashboardController;
 use App\Http\Controllers\Master\DepartmentController;
 use App\Http\Controllers\Master\LineController;
 use App\Http\Controllers\Master\MachineController;
+use App\Http\Controllers\Master\ItemController;
+use App\Http\Controllers\Master\OperatorController;
+use App\Http\Controllers\Master\AuditLogController;
+use App\Http\Controllers\Master\ItemImportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,20 +31,20 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('master')
-    ->name('master.')
+    ->as('master.')
     ->group(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Master Dashboard
+        | Dashboard
         |--------------------------------------------------------------------------
         */
-        Route::get('/dashboard', [DashboardController::class, 'index'])
+        Route::get('dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
 
         /*
         |--------------------------------------------------------------------------
-        | Master Data Resources
+        | Master Data
         |--------------------------------------------------------------------------
         */
         Route::resource('departments', DepartmentController::class)
@@ -51,4 +55,39 @@ Route::prefix('master')
 
         Route::resource('machines', MachineController::class)
             ->except(['show', 'destroy']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Items (FULL CRUD TANPA SHOW & DESTROY)
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('items', ItemController::class)
+            ->except(['show', 'destroy']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Item Import
+        |--------------------------------------------------------------------------
+        */
+        Route::get('items/import', [ItemImportController::class, 'form'])
+            ->name('items.import.form');
+
+        Route::post('items/import', [ItemImportController::class, 'import'])
+            ->name('items.import');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Operators
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('operators', OperatorController::class)
+            ->except(['show', 'destroy']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Audit & Monitoring
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('audit-logs', AuditLogController::class)
+            ->only(['index']);
     });

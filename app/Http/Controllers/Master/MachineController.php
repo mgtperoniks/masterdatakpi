@@ -13,6 +13,9 @@ class MachineController extends Controller
 {
     use Auditable;
 
+    /**
+     * Display a listing of machines.
+     */
     public function index()
     {
         $machines = MdMachine::with(['department', 'line'])
@@ -22,6 +25,9 @@ class MachineController extends Controller
         return view('master.machines.index', compact('machines'));
     }
 
+    /**
+     * Show the form for creating a new machine.
+     */
     public function create()
     {
         $departments = MdDepartment::where('status', 'active')
@@ -35,25 +41,20 @@ class MachineController extends Controller
         return view('master.machines.create', compact('departments', 'lines'));
     }
 
+    /**
+     * Store a newly created machine.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'code'            => 'required|string|max:30|unique:md_machines,code',
-            'name'            => 'required|string|max:100',
+        $validated = $request->validate([
+            'code'            => 'required|string|max:50|unique:md_machines,code',
+            'name'            => 'required|string|max:150',
             'department_code' => 'required|exists:md_departments,code',
             'line_code'       => 'nullable|exists:md_lines,code',
             'status'          => 'required|in:active,maintenance,inactive',
         ]);
 
-        $machine = MdMachine::create(
-            $request->only([
-                'code',
-                'name',
-                'department_code',
-                'line_code',
-                'status',
-            ])
-        );
+        $machine = MdMachine::create($validated);
 
         $this->audit(
             'md_machines',
@@ -65,13 +66,14 @@ class MachineController extends Controller
 
         return redirect()
             ->route('master.machines.index')
-            ->with('success', 'Machine created successfully');
+            ->with('success', 'Machine berhasil dibuat.');
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified machine.
+     */
+    public function edit(MdMachine $machine)
     {
-        $machine = MdMachine::findOrFail($id);
-
         $departments = MdDepartment::where('status', 'active')
             ->orderBy('code')
             ->get();
@@ -83,25 +85,20 @@ class MachineController extends Controller
         return view('master.machines.edit', compact('machine', 'departments', 'lines'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified machine.
+     */
+    public function update(Request $request, MdMachine $machine)
     {
-        $machine = MdMachine::findOrFail($id);
-
-        $request->validate([
-            'name'            => 'required|string|max:100',
+        $validated = $request->validate([
+            'code'            => 'required|string|max:50|unique:md_machines,code,' . $machine->id,
+            'name'            => 'required|string|max:150',
             'department_code' => 'required|exists:md_departments,code',
             'line_code'       => 'nullable|exists:md_lines,code',
             'status'          => 'required|in:active,maintenance,inactive',
         ]);
 
-        $machine->update(
-            $request->only([
-                'name',
-                'department_code',
-                'line_code',
-                'status',
-            ])
-        );
+        $machine->update($validated);
 
         $this->audit(
             'md_machines',
@@ -113,6 +110,6 @@ class MachineController extends Controller
 
         return redirect()
             ->route('master.machines.index')
-            ->with('success', 'Machine updated successfully');
+            ->with('success', 'Machine berhasil diperbarui.');
     }
 }

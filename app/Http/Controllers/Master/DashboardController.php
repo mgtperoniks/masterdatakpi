@@ -12,27 +12,49 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $summary = [
-            'machines' => [
-                'total' => MdMachine::count(),
-                'active' => MdMachine::where('status', 'active')->count(),
-                'inactive' => MdMachine::where('status', '!=', 'active')->count(),
-            ],
-            'items' => [
-                'total' => MdItem::count(),
-                'active' => MdItem::where('status', 'active')->count(),
-                'inactive' => MdItem::where('status', '!=', 'active')->count(),
-            ],
-            'operators' => [
-                'total' => MdOperator::count(),
-                'active' => MdOperator::where('status', 'active')->count(),
-                'inactive' => MdOperator::where('status', '!=', 'active')->count(),
-            ],
-            'departments' => [
-                'total' => MdDepartment::count(),
-            ],
+        /**
+         * ITEM GUARDRAILS
+         */
+        $items = [
+            'total'            => MdItem::count(),
+            'active'           => MdItem::where('status', 'active')->count(),
+            'inactive'         => MdItem::where('status', 'inactive')->count(),
+            'invalid_cycle'    => MdItem::where('cycle_time_sec', '<=', 0)->count(),
         ];
 
-        return view('dashboard.index', compact('summary'));
+        /**
+         * MACHINE GUARDRAILS
+         */
+        $machines = [
+            'total'      => MdMachine::count(),
+            'active'     => MdMachine::where('status', 'active')->count(),
+            'inactive'   => MdMachine::where('status', 'inactive')->count(),
+            'offline'    => MdMachine::get()
+                ->filter(fn ($m) => in_array($m->computed_status, ['OFFLINE', 'STALE']))
+                ->count(),
+        ];
+
+        /**
+         * OPERATOR GUARDRAILS
+         */
+        $operators = [
+            'total'    => MdOperator::count(),
+            'active'   => MdOperator::where('status', 'active')->count(),
+            'inactive' => MdOperator::where('status', 'inactive')->count(),
+        ];
+
+        /**
+         * DEPARTMENT SUMMARY
+         */
+        $departments = [
+            'total' => MdDepartment::count(),
+        ];
+
+        return view('master.dashboard.index', compact(
+            'items',
+            'machines',
+            'operators',
+            'departments'
+        ));
     }
 }
