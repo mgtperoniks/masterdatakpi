@@ -11,6 +11,10 @@ class DepartmentController extends Controller
 {
     use Auditable;
 
+    /**
+     * Display a listing of departments.
+     * Index tampil ACTIVE & INACTIVE
+     */
     public function index()
     {
         $departments = MdDepartment::orderBy('code')->get();
@@ -18,28 +22,27 @@ class DepartmentController extends Controller
         return view('master.departments.index', compact('departments'));
     }
 
+    /**
+     * Show the form for creating a new department.
+     */
     public function create()
     {
         return view('master.departments.create');
     }
 
     /**
-     * Store new department
+     * Store new department.
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'code'   => 'required|string|max:20|unique:md_departments,code',
             'name'   => 'required|string|max:100',
             'status' => 'required|in:active,inactive',
         ]);
 
-        // CREATE
-        $department = MdDepartment::create(
-            $request->only(['code', 'name', 'status'])
-        );
+        $department = MdDepartment::create($validated);
 
-        // AUDIT
         $this->audit(
             'md_departments',
             $department->code,
@@ -50,34 +53,29 @@ class DepartmentController extends Controller
 
         return redirect()
             ->route('master.departments.index')
-            ->with('success', 'Department created successfully');
+            ->with('success', 'Department berhasil dibuat.');
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified department.
+     */
+    public function edit(MdDepartment $department)
     {
-        $department = MdDepartment::findOrFail($id);
-
         return view('master.departments.edit', compact('department'));
     }
 
     /**
-     * Update department
+     * Update department.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, MdDepartment $department)
     {
-        $department = MdDepartment::findOrFail($id);
-
-        $request->validate([
+        $validated = $request->validate([
             'name'   => 'required|string|max:100',
             'status' => 'required|in:active,inactive',
         ]);
 
-        // UPDATE
-        $department->update(
-            $request->only(['name', 'status'])
-        );
+        $department->update($validated);
 
-        // AUDIT
         $this->audit(
             'md_departments',
             $department->code,
@@ -88,6 +86,46 @@ class DepartmentController extends Controller
 
         return redirect()
             ->route('master.departments.index')
-            ->with('success', 'Department updated successfully');
+            ->with('success', 'Department berhasil diperbarui.');
+    }
+
+    /**
+     * Deactivate department (NO DELETE)
+     */
+    public function deactivate(MdDepartment $department)
+    {
+        $department->update([
+            'status' => 'inactive',
+        ]);
+
+        $this->audit(
+            'md_departments',
+            $department->code,
+            'deactivate',
+            'master',
+            'Deactivate department'
+        );
+
+        return back()->with('success', 'Department dinonaktifkan.');
+    }
+
+    /**
+     * Activate department
+     */
+    public function activate(MdDepartment $department)
+    {
+        $department->update([
+            'status' => 'active',
+        ]);
+
+        $this->audit(
+            'md_departments',
+            $department->code,
+            'activate',
+            'master',
+            'Activate department'
+        );
+
+        return back()->with('success', 'Department diaktifkan kembali.');
     }
 }

@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Master;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\MdOperator;
 use App\Models\MdDepartment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OperatorController extends Controller
 {
@@ -14,8 +15,8 @@ class OperatorController extends Controller
      */
     public function index()
     {
-        $operators = MdOperator::with('department')
-            ->orderBy('code')
+        $operators = MdOperator::orderBy('code')
+            ->orderByDesc('employment_seq')
             ->get();
 
         return view('master.operators.index', compact('operators'));
@@ -26,7 +27,9 @@ class OperatorController extends Controller
      */
     public function create()
     {
-        $departments = MdDepartment::orderBy('code')->get();
+        $departments = MdDepartment::where('status', 'active')
+            ->orderBy('code')
+            ->get();
 
         return view('master.operators.create', compact('departments'));
     }
@@ -36,14 +39,38 @@ class OperatorController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'code'            => 'required|string|max:30|unique:md_operators,code',
+        $request->validate([
+            'code'            => 'required|string|max:50',
             'name'            => 'required|string|max:100',
             'department_code' => 'required|exists:md_departments,code',
-            'status'          => 'required|in:active,inactive',
         ]);
 
-        MdOperator::create($validated);
+        DB::transaction(function () use ($request) {
+
+            // Pastikan tidak ada operator ACTIVE dengan code yang sama
+            $activeExists = MdOperator::where('code', $request->code)
+                ->where('status', 'active')
+                ->exists();
+
+            if ($activeExists) {
+                abort(422, 'Kode operator masih aktif. Nonaktifkan terlebih dahulu.');
+            }
+
+            // Ambil employment_seq terakhir
+            $lastSeq = MdOperator::where('code', $request->code)
+                ->max('employment_seq');
+
+            $nextSeq = $lastSeq ? $lastSeq + 1 : 1;
+
+            MdOperator::create([
+                'code'            => $request->code,
+                'name'            => $request->name,
+                'department_code' => $request->department_code,
+                'employment_seq'  => $nextSeq,
+                'status'          => 'active',
+                'active_from'     => now()->toDateString(),
+            ]);
+        });
 
         return redirect()
             ->route('master.operators.index')
@@ -52,21 +79,26 @@ class OperatorController extends Controller
 
     /**
      * Show the form for editing the specified operator.
+     * PATCH: kirim $departments (fix undefined variable)
      */
     public function edit(MdOperator $operator)
     {
-        $departments = MdDepartment::orderBy('code')->get();
+        $departments = MdDepartment::where('status', 'active')
+            ->orderBy('code')
+            ->get();
 
-        return view('master.operators.edit', compact('operator', 'departments'));
+        return view(
+            'master.operators.edit',
+            compact('operator', 'departments')
+        );
     }
 
     /**
-     * Update the specified operator.
+     * Update operator (name, department, status).
      */
     public function update(Request $request, MdOperator $operator)
     {
         $validated = $request->validate([
-            'code'            => 'required|string|max:30|unique:md_operators,code,' . $operator->id,
             'name'            => 'required|string|max:100',
             'department_code' => 'required|exists:md_departments,code',
             'status'          => 'required|in:active,inactive',
@@ -77,5 +109,62 @@ class OperatorController extends Controller
         return redirect()
             ->route('master.operators.index')
             ->with('success', 'Operator berhasil diperbarui.');
+    }
+
+    /**
+     * Deactivate operator (no delete).
+     */
+    public function deactivate(int $id)
+    {
+        $operator = MdOperator::findOrFail($id);
+
+        if ($operator->status === 'inactive') {
+            return back();
+        }
+
+        $operator->update([
+            'status'       => 'inactive',
+            'active_until' => now()->toDateString(),
+        ]);
+
+        return back()->with('success', 'Operator berhasil dinonaktifkan.');
+    }
+
+    /**
+     * Activate operator with new employment sequence.
+     */
+    public function activate(int $id)
+    {
+        DB::transaction(function () use ($id) {
+
+            $old = MdOperator::findOrFail($id);
+
+            if ($old->status === 'active') {
+                return;
+            }
+
+            // Pastikan tidak ada operator ACTIVE dengan code yang sama
+            $activeExists = MdOperator::where('code', $old->code)
+                ->where('status', 'active')
+                ->exists();
+
+            if ($activeExists) {
+                abort(422, 'Masih ada operator aktif dengan kode ini.');
+            }
+
+            $nextSeq = MdOperator::where('code', $old->code)
+                ->max('employment_seq') + 1;
+
+            MdOperator::create([
+                'code'            => $old->code,
+                'name'            => $old->name,
+                'department_code' => $old->department_code,
+                'employment_seq'  => $nextSeq,
+                'status'          => 'active',
+                'active_from'     => now()->toDateString(),
+            ]);
+        });
+
+        return back()->with('success', 'Operator berhasil diaktifkan kembali.');
     }
 }

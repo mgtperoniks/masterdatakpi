@@ -14,11 +14,11 @@
     </a>
 </div>
 
-{{-- HARD STOP WARNING --}}
+{{-- WARNING JIKA ADA OPERATOR INACTIVE --}}
 @if ($operators->where('status', 'inactive')->count() > 0)
     <div class="alert alert-warning small">
-        Ada <strong>Operator inactive</strong>. Operator inactive tidak akan ditarik ke modul KPI
-        dan tidak dihitung dalam perhitungan performa.
+        Terdapat <strong>operator inactive</strong>. Operator inactive tidak akan
+        digunakan dalam modul KPI dan perhitungan performa.
     </div>
 @endif
 
@@ -43,7 +43,8 @@
                     <tr>
                         <th>Code</th>
                         <th>Name</th>
-                        <th>Department</th>
+                        <th>Seq</th>
+                        <th>Active Period</th>
                         <th>Status</th>
                         <th class="text-end">Action</th>
                     </tr>
@@ -53,19 +54,48 @@
                         <tr class="{{ $operator->status === 'inactive' ? 'opacity-50' : '' }}">
                             <td>{{ $operator->code }}</td>
                             <td>{{ $operator->name }}</td>
-                            <td>{{ $operator->department->name ?? '-' }}</td>
-
+                            <td>{{ $operator->employment_seq }}</td>
+                            <td class="small">
+                                {{ $operator->active_from ?? '-' }}
+                                →
+                                {{ $operator->active_until ?? 'Present' }}
+                            </td>
                             <td>
                                 <span class="badge bg-{{ $operator->status === 'active' ? 'success' : 'secondary' }}">
                                     {{ ucfirst($operator->status) }}
                                 </span>
                             </td>
-
                             <td class="text-end">
-                                <a href="{{ route('master.operators.edit', $operator->id) }}"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Edit
-                                </a>
+                                <div class="d-inline-flex gap-1">
+
+                                    <a href="{{ route('master.operators.edit', $operator->id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Edit
+                                    </a>
+
+                                    @if ($operator->status === 'active')
+                                        <form method="POST"
+                                              action="{{ route('master.operators.deactivate', $operator->id) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-warning"
+                                                    onclick="return confirm('Nonaktifkan operator ini?')">
+                                                Deactivate
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST"
+                                              action="{{ route('master.operators.activate', $operator->id) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Aktifkan kembali operator ini?')">
+                                                Activate
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                </div>
                             </td>
                         </tr>
                     @endforeach

@@ -12,6 +12,10 @@ class LineController extends Controller
 {
     use Auditable;
 
+    /**
+     * Display a listing of lines.
+     * Index tampil ACTIVE & INACTIVE
+     */
     public function index()
     {
         $lines = MdLine::with('department')
@@ -21,6 +25,10 @@ class LineController extends Controller
         return view('master.lines.index', compact('lines'));
     }
 
+    /**
+     * Show the form for creating a new line.
+     * Dropdown department → hanya ACTIVE (hard guard)
+     */
     public function create()
     {
         $departments = MdDepartment::where('status', 'active')
@@ -30,18 +38,19 @@ class LineController extends Controller
         return view('master.lines.create', compact('departments'));
     }
 
+    /**
+     * Store a newly created line.
+     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'code'            => 'required|string|max:20|unique:md_lines,code',
             'department_code' => 'required|exists:md_departments,code',
             'name'            => 'required|string|max:100',
             'status'          => 'required|in:active,inactive',
         ]);
 
-        $line = MdLine::create(
-            $request->only(['code', 'department_code', 'name', 'status'])
-        );
+        $line = MdLine::create($validated);
 
         $this->audit(
             'md_lines',
@@ -53,13 +62,14 @@ class LineController extends Controller
 
         return redirect()
             ->route('master.lines.index')
-            ->with('success', 'Line created successfully');
+            ->with('success', 'Line berhasil dibuat.');
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified line.
+     */
+    public function edit(MdLine $line)
     {
-        $line = MdLine::findOrFail($id);
-
         $departments = MdDepartment::where('status', 'active')
             ->orderBy('code')
             ->get();
@@ -67,19 +77,18 @@ class LineController extends Controller
         return view('master.lines.edit', compact('line', 'departments'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified line.
+     */
+    public function update(Request $request, MdLine $line)
     {
-        $line = MdLine::findOrFail($id);
-
-        $request->validate([
+        $validated = $request->validate([
             'department_code' => 'required|exists:md_departments,code',
             'name'            => 'required|string|max:100',
             'status'          => 'required|in:active,inactive',
         ]);
 
-        $line->update(
-            $request->only(['department_code', 'name', 'status'])
-        );
+        $line->update($validated);
 
         $this->audit(
             'md_lines',
@@ -91,6 +100,46 @@ class LineController extends Controller
 
         return redirect()
             ->route('master.lines.index')
-            ->with('success', 'Line updated successfully');
+            ->with('success', 'Line berhasil diperbarui.');
+    }
+
+    /**
+     * Deactivate line (NO DELETE)
+     */
+    public function deactivate(MdLine $line)
+    {
+        $line->update([
+            'status' => 'inactive',
+        ]);
+
+        $this->audit(
+            'md_lines',
+            $line->code,
+            'deactivate',
+            'master',
+            'Deactivate line'
+        );
+
+        return back()->with('success', 'Line dinonaktifkan.');
+    }
+
+    /**
+     * Activate line
+     */
+    public function activate(MdLine $line)
+    {
+        $line->update([
+            'status' => 'active',
+        ]);
+
+        $this->audit(
+            'md_lines',
+            $line->code,
+            'activate',
+            'master',
+            'Activate line'
+        );
+
+        return back()->with('success', 'Line diaktifkan kembali.');
     }
 }

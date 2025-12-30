@@ -36,7 +36,7 @@
 @else
     <div class="card shadow-sm">
         <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Code</th>
@@ -56,21 +56,16 @@
                             <td>{{ $machine->department->name ?? '-' }}</td>
                             <td>{{ $machine->line->name ?? '-' }}</td>
 
+                            {{-- STATUS DB (MASTER LIFECYCLE) --}}
                             <td>
-                                @php
-                                    $statusClass = match ($machine->status) {
-                                        'active' => 'success',
-                                        'inactive' => 'secondary',
-                                        'maintenance' => 'warning',
-                                        default => 'light',
-                                    };
-                                @endphp
-
-                                <span class="badge bg-{{ $statusClass }}">
-                                    {{ ucfirst($machine->status) }}
-                                </span>
+                                @if ($machine->status === 'inactive')
+                                    <span class="badge bg-secondary">Inactive</span>
+                                @else
+                                    <span class="badge bg-success">Active</span>
+                                @endif
                             </td>
 
+                            {{-- STATUS MESIN (RUNTIME / COMPUTED) --}}
                             <td>
                                 @php
                                     $runtimeClass = match ($machine->computed_status) {
@@ -86,10 +81,36 @@
                             </td>
 
                             <td class="text-end">
-                                <a href="{{ route('master.machines.edit', $machine->id) }}"
+
+                                {{-- EDIT --}}
+                                <a href="{{ route('master.machines.edit', $machine) }}"
                                    class="btn btn-sm btn-outline-primary">
                                     Edit
                                 </a>
+
+                                {{-- ACTIVATE / DEACTIVATE --}}
+                                @if ($machine->status === 'active')
+                                    <form method="POST"
+                                          action="{{ route('master.machines.deactivate', $machine) }}"
+                                          class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="btn btn-sm btn-warning">
+                                            Deactivate
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST"
+                                          action="{{ route('master.machines.activate', $machine) }}"
+                                          class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="btn btn-sm btn-success">
+                                            Activate
+                                        </button>
+                                    </form>
+                                @endif
+
                             </td>
                         </tr>
                     @endforeach

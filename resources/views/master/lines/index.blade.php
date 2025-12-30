@@ -13,7 +13,7 @@
     </a>
 </div>
 
-@if($lines->isEmpty())
+@if ($lines->isEmpty())
     <div class="card shadow-sm">
         <div class="card-body text-center py-5">
             <h6 class="text-muted mb-2">No lines found</h6>
@@ -28,7 +28,7 @@
 @else
     <div class="card shadow-sm">
         <div class="card-body p-0">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
                         <th>Code</th>
@@ -39,30 +39,49 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($lines as $line)
-                        <tr>
+                    @foreach ($lines as $line)
+                        <tr class="{{ $line->status === 'inactive' ? 'opacity-50' : '' }}">
                             <td>{{ $line->code }}</td>
                             <td>{{ $line->department->name ?? '-' }}</td>
                             <td>{{ $line->name }}</td>
                             <td>
-                                @php
-                                    $statusClass = match($line->status) {
-                                        'active' => 'success',
-                                        'inactive' => 'secondary',
-                                        'maintenance' => 'warning',
-                                        default => 'light',
-                                    };
-                                @endphp
-
-                                <span class="badge bg-{{ $statusClass }}">
-                                    {{ ucfirst($line->status) }}
-                                </span>
+                                @if ($line->status === 'inactive')
+                                    <span class="badge bg-secondary">Inactive</span>
+                                @else
+                                    <span class="badge bg-success">Active</span>
+                                @endif
                             </td>
                             <td class="text-end">
-                                <a href="{{ route('master.lines.edit', $line->id) }}"
+
+                                {{-- EDIT --}}
+                                <a href="{{ route('master.lines.edit', $line) }}"
                                    class="btn btn-sm btn-outline-primary">
                                     Edit
                                 </a>
+
+                                {{-- ACTIVATE / DEACTIVATE --}}
+                                @if ($line->status === 'active')
+                                    <form method="POST"
+                                          action="{{ route('master.lines.deactivate', $line) }}"
+                                          class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="btn btn-sm btn-warning">
+                                            Deactivate
+                                        </button>
+                                    </form>
+                                @else
+                                    <form method="POST"
+                                          action="{{ route('master.lines.activate', $line) }}"
+                                          class="d-inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button class="btn btn-sm btn-success">
+                                            Activate
+                                        </button>
+                                    </form>
+                                @endif
+
                             </td>
                         </tr>
                     @endforeach

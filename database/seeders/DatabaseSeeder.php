@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             MdMachineSeeder::class,
             MdOperatorSeeder::class,
             MdItemSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

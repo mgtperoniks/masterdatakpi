@@ -15,6 +15,7 @@ class MachineController extends Controller
 
     /**
      * Display a listing of machines.
+     * Index boleh tampil ACTIVE & INACTIVE
      */
     public function index()
     {
@@ -27,6 +28,7 @@ class MachineController extends Controller
 
     /**
      * Show the form for creating a new machine.
+     * Dropdown hanya ACTIVE (hard guard)
      */
     public function create()
     {
@@ -51,7 +53,7 @@ class MachineController extends Controller
             'name'            => 'required|string|max:150',
             'department_code' => 'required|exists:md_departments,code',
             'line_code'       => 'nullable|exists:md_lines,code',
-            'status'          => 'required|in:active,maintenance,inactive',
+            'status'          => 'required|in:active,inactive',
         ]);
 
         $machine = MdMachine::create($validated);
@@ -95,7 +97,7 @@ class MachineController extends Controller
             'name'            => 'required|string|max:150',
             'department_code' => 'required|exists:md_departments,code',
             'line_code'       => 'nullable|exists:md_lines,code',
-            'status'          => 'required|in:active,maintenance,inactive',
+            'status'          => 'required|in:active,inactive',
         ]);
 
         $machine->update($validated);
@@ -111,5 +113,45 @@ class MachineController extends Controller
         return redirect()
             ->route('master.machines.index')
             ->with('success', 'Machine berhasil diperbarui.');
+    }
+
+    /**
+     * Deactivate machine (NO DELETE)
+     */
+    public function deactivate(MdMachine $machine)
+    {
+        $machine->update([
+            'status' => 'inactive',
+        ]);
+
+        $this->audit(
+            'md_machines',
+            $machine->code,
+            'deactivate',
+            'master',
+            'Deactivate machine'
+        );
+
+        return back()->with('success', 'Machine dinonaktifkan.');
+    }
+
+    /**
+     * Activate machine
+     */
+    public function activate(MdMachine $machine)
+    {
+        $machine->update([
+            'status' => 'active',
+        ]);
+
+        $this->audit(
+            'md_machines',
+            $machine->code,
+            'activate',
+            'master',
+            'Activate machine'
+        );
+
+        return back()->with('success', 'Machine diaktifkan kembali.');
     }
 }

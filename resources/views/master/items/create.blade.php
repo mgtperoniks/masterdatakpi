@@ -3,7 +3,20 @@
 @section('title','Add Item')
 @section('page-title','Add Item')
 
+@php
+    use App\Helpers\Permission;
+@endphp
+
 @section('content')
+
+{{-- HARD GUARD (UI LEVEL) --}}
+@if (!Permission::canManage('items'))
+
+    <div class="alert alert-danger">
+        Anda tidak memiliki akses ke halaman ini.
+    </div>
+
+@else
 
 <div class="card shadow-sm">
     <div class="card-body">
@@ -25,14 +38,20 @@
                 <label class="form-label">Department</label>
                 <select name="department_code" class="form-select" required>
                     @foreach($departments as $dept)
-                        <option value="{{ $dept->code }}">{{ $dept->name }}</option>
+                        <option value="{{ $dept->code }}">
+                            {{ $dept->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Cycle Time (sec)</label>
-                <input type="number" name="cycle_time_sec" class="form-control" min="1" required>
+                <input type="number"
+                       name="cycle_time_sec"
+                       class="form-control"
+                       min="1"
+                       required>
             </div>
 
             <div class="mb-3">
@@ -44,11 +63,16 @@
             </div>
 
             <button class="btn btn-primary">Save</button>
-            <a href="{{ route('master.items.index') }}" class="btn btn-secondary ms-2">Cancel</a>
+            <a href="{{ route('master.items.index') }}"
+               class="btn btn-secondary ms-2">
+                Cancel
+            </a>
 
         </form>
 
     </div>
 </div>
+
+@endif
 
 @endsection

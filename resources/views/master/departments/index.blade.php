@@ -15,7 +15,7 @@
 </div>
 
 {{-- Empty State --}}
-@if($departments->isEmpty())
+@if ($departments->isEmpty())
     <div class="card shadow-sm">
         <div class="card-body text-center py-5">
             <h6 class="text-muted mb-2">No departments found</h6>
@@ -33,7 +33,7 @@
 <div class="card shadow-sm">
     <div class="card-body p-0">
 
-        <table class="table table-hover mb-0">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
                     <th>Code</th>
@@ -44,28 +44,47 @@
             </thead>
             <tbody>
                 @foreach ($departments as $department)
-                    <tr>
+                    <tr class="{{ $department->status === 'inactive' ? 'opacity-50' : '' }}">
                         <td>{{ $department->code }}</td>
                         <td>{{ $department->name }}</td>
                         <td>
-                            @php
-                                $statusClass = match($department->status) {
-                                    'active' => 'success',
-                                    'inactive' => 'secondary',
-                                    'maintenance' => 'warning',
-                                    default => 'light',
-                                };
-                            @endphp
-
-                            <span class="badge bg-{{ $statusClass }}">
-                                {{ ucfirst($department->status) }}
-                            </span>
+                            @if ($department->status === 'inactive')
+                                <span class="badge bg-secondary">Inactive</span>
+                            @else
+                                <span class="badge bg-success">Active</span>
+                            @endif
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('master.departments.edit', $department->id) }}"
+
+                            {{-- EDIT --}}
+                            <a href="{{ route('master.departments.edit', $department) }}"
                                class="btn btn-sm btn-outline-primary">
                                 Edit
                             </a>
+
+                            {{-- ACTIVATE / DEACTIVATE --}}
+                            @if ($department->status === 'active')
+                                <form method="POST"
+                                      action="{{ route('master.departments.deactivate', $department) }}"
+                                      class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn btn-sm btn-warning">
+                                        Deactivate
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST"
+                                      action="{{ route('master.departments.activate', $department) }}"
+                                      class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn btn-sm btn-success">
+                                        Activate
+                                    </button>
+                                </form>
+                            @endif
+
                         </td>
                     </tr>
                 @endforeach

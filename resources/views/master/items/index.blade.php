@@ -2,23 +2,33 @@
 
 @section('title', 'Master Items')
 
+@php
+    use App\Helpers\Permission;
+@endphp
+
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Master Items</h4>
 
     <div class="d-flex gap-2">
-        {{-- IMPORT CSV --}}
-        <a href="{{ route('master.items.import.form') }}"
-           class="btn btn-outline-secondary">
-            Import CSV
-        </a>
 
-        {{-- ADD ITEM --}}
-        <a href="{{ route('master.items.create') }}"
-           class="btn btn-primary">
-            + Add Item
-        </a>
+        {{-- IMPORT CSV (MANAGE ITEMS) --}}
+        @if (Permission::canManage('items'))
+            <a href="{{ route('master.items.import.form') }}"
+               class="btn btn-outline-secondary">
+                Import CSV
+            </a>
+        @endif
+
+        {{-- ADD ITEM (MANAGE ITEMS) --}}
+        @if (Permission::canManage('items'))
+            <a href="{{ route('master.items.create') }}"
+               class="btn btn-primary">
+                + Add Item
+            </a>
+        @endif
+
     </div>
 </div>
 
@@ -71,10 +81,42 @@
                     </td>
 
                     <td class="text-end">
-                        <a href="{{ route('master.items.edit', $item->id) }}"
-                           class="btn btn-sm btn-outline-primary">
-                            Edit
-                        </a>
+
+                        {{-- EDIT --}}
+                        @if (Permission::canManage('items'))
+                            <a href="{{ route('master.items.edit', $item) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                Edit
+                            </a>
+                        @endif
+
+                        {{-- ACTIVATE / DEACTIVATE --}}
+                        @if (Permission::canManage('items'))
+
+                            @if ($item->status === 'active')
+                                <form method="POST"
+                                      action="{{ route('master.items.deactivate', $item) }}"
+                                      class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn btn-sm btn-warning">
+                                        Deactivate
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST"
+                                      action="{{ route('master.items.activate', $item) }}"
+                                      class="d-inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button class="btn btn-sm btn-success">
+                                        Activate
+                                    </button>
+                                </form>
+                            @endif
+
+                        @endif
+
                     </td>
                 </tr>
             @empty

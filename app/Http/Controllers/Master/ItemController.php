@@ -11,6 +11,7 @@ class ItemController extends Controller
 {
     /**
      * Display a listing of the items.
+     * Index boleh tampil ACTIVE & INACTIVE
      */
     public function index(Request $request)
     {
@@ -24,10 +25,7 @@ class ItemController extends Controller
             $query->where('status', $request->status);
         }
 
-        $items = $query
-            ->orderBy('code')
-            ->get();
-
+        $items = $query->orderBy('code')->get();
         $departments = MdDepartment::orderBy('code')->get();
 
         return view('master.items.index', compact('items', 'departments'));
@@ -35,10 +33,13 @@ class ItemController extends Controller
 
     /**
      * Show the form for creating a new item.
+     * Dropdown department → hanya ACTIVE (hard guard)
      */
     public function create()
     {
-        $departments = MdDepartment::orderBy('code')->get();
+        $departments = MdDepartment::where('status', 'active')
+            ->orderBy('code')
+            ->get();
 
         return view('master.items.create', compact('departments'));
     }
@@ -68,7 +69,9 @@ class ItemController extends Controller
      */
     public function edit(MdItem $item)
     {
-        $departments = MdDepartment::orderBy('code')->get();
+        $departments = MdDepartment::where('status', 'active')
+            ->orderBy('code')
+            ->get();
 
         return view('master.items.edit', compact('item', 'departments'));
     }
@@ -91,5 +94,29 @@ class ItemController extends Controller
         return redirect()
             ->route('master.items.index')
             ->with('success', 'Item berhasil diperbarui.');
+    }
+
+    /**
+     * Deactivate item (NO DELETE)
+     */
+    public function deactivate(MdItem $item)
+    {
+        $item->update([
+            'status' => 'inactive',
+        ]);
+
+        return back()->with('success', 'Item dinonaktifkan.');
+    }
+
+    /**
+     * Activate item
+     */
+    public function activate(MdItem $item)
+    {
+        $item->update([
+            'status' => 'active',
+        ]);
+
+        return back()->with('success', 'Item diaktifkan kembali.');
     }
 }
