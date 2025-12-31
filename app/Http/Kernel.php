@@ -38,11 +38,13 @@ class Kernel extends HttpKernel
      * Route middleware aliases.
      */
     protected $middlewareAliases = [
-        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
-        'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
+
+        // Laravel default
+        'auth'     => \Illuminate\Auth\Middleware\Authenticate::class,
+        'guest'    => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
 
-        // ✅ CUSTOM PERMISSION MIDDLEWARE
+        // ✅ Custom permission middleware (MD-UI-10 / role + scope)
         'permission' => \App\Http\Middleware\CheckPermission::class,
     ];
 }
