@@ -14,6 +14,9 @@ class MdItem extends Model
     protected $fillable = [
         'code',
         'name',
+        'aisi',
+        'standard',
+        'unit_weight',
         'department_code',
         'cycle_time_sec',
         'status',
@@ -29,6 +32,7 @@ class MdItem extends Model
 
     protected $casts = [
         'cycle_time_sec' => 'integer',
+        'unit_weight'    => 'decimal:3',
         'last_sync_at'   => 'datetime',
         'deleted_at'     => 'datetime',
     ];
@@ -38,6 +42,10 @@ class MdItem extends Model
      */
     public function department()
     {
-        return $this->belongsTo(MdDepartment::class, 'department_code', 'code');
+        return $this->belongsTo(
+            MdDepartment::class,
+            'department_code',
+            'code'
+        );
     }
 }

@@ -46,6 +46,9 @@
             <thead class="table-light">
                 <tr>
                     <th>Name</th>
+                    <th>AISI</th>
+                    <th>Standard</th>
+                    <th>Weight (kg)</th>
                     <th>Cycle Time</th>
                     <th>Status</th>
                     <th class="text-end">Action</th>
@@ -61,8 +64,17 @@
                 @endphp
 
                 <tr class="{{ $item->status === 'inactive' ? 'opacity-50' : '' }}">
+
+                    <td>{{ $item->name }}</td>
+
+                    <td>{{ $item->aisi ?? '-' }}</td>
+
+                    <td>{{ $item->standard ?? '-' }}</td>
+
                     <td>
-                        {{ $item->name }}
+                        {{ $item->unit_weight !== null
+                            ? number_format($item->unit_weight, 3)
+                            : '-' }}
                     </td>
 
                     <td>
@@ -121,7 +133,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">
+                    <td colspan="7" class="text-center text-muted py-4">
                         No items available
                     </td>
                 </tr>
