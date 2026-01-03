@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\MdItem;
 use App\Models\MdDepartment;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ItemImportController extends Controller
 {
@@ -21,56 +20,102 @@ class ItemImportController extends Controller
             'file' => 'required|file|mimes:csv,txt',
         ]);
 
-        $rows = array_map('str_getcsv', file($request->file));
-        $header = array_map('trim', array_shift($rows));
+        $rows = array_map('str_getcsv', file($request->file->getRealPath()));
 
-        $required = ['code','name','department_code','cycle_time_sec','status'];
-
-        if ($header !== $required) {
-            return back()->withErrors('Format CSV tidak sesuai template.');
+        if (count($rows) < 2) {
+            return response()->json(['error' => 'File CSV kosong'], 422);
         }
 
-        $inserted = 0;
-        $errors = [];
+        $header = array_map(
+            fn ($h) => strtolower(trim($h)),
+            array_shift($rows)
+        );
 
-        foreach ($rows as $i => $row) {
-            $data = array_combine($header, $row);
+        $required = [
+            'code',
+            'name',
+            'aisi',
+            'standard',
+            'unit_weight',
+            'department_code',
+            'cycle_time_sec',
+            'status',
+        ];
 
-            try {
-                // basic validation
-                if (
-                    empty($data['code']) ||
-                    empty($data['name']) ||
-                    !MdDepartment::where('code',$data['department_code'])->exists() ||
-                    (int)$data['cycle_time_sec'] <= 0 ||
-                    !in_array($data['status'], ['active','inactive'])
-                ) {
-                    throw new \Exception('Invalid data');
-                }
-
-                // skip if exists
-                if (MdItem::where('code',$data['code'])->exists()) {
-                    continue;
-                }
-
-                MdItem::create([
-                    'code' => $data['code'],
-                    'name' => $data['name'],
-                    'department_code' => $data['department_code'],
-                    'cycle_time_sec' => (int)$data['cycle_time_sec'],
-                    'status' => $data['status'],
-                ]);
-
-                $inserted++;
-
-            } catch (\Throwable $e) {
-                $errors[] = 'Row '.($i+2).' gagal';
+        foreach ($required as $col) {
+            if (!in_array($col, $header, true)) {
+                return response()->json([
+                    'error' => "Kolom CSV wajib tidak ditemukan: {$col}"
+                ], 422);
             }
         }
 
-        return redirect()
-            ->route('master.items.index')
-            ->with('success', "Import selesai. {$inserted} item berhasil.")
-            ->with('import_errors', $errors);
+        $inserted = 0;
+        $errors   = [];
+
+        foreach ($rows as $i => $row) {
+
+            if (count($row) !== count($header)) {
+                $errors[] = "Row " . ($i + 2) . " jumlah kolom tidak sesuai";
+                continue;
+            }
+
+            $data = array_combine($header, $row);
+            $data = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $data);
+
+            $code   = $data['code'] ?? '';
+            $name   = $data['name'] ?? '';
+            $dept   = $data['department_code'] ?? '';
+            $status = strtolower($data['status'] ?? '');
+
+            if ($code === '' || $name === '') {
+                $errors[] = "Row " . ($i + 2) . " code / name kosong";
+                continue;
+            }
+
+            if (!MdDepartment::where('code', $dept)->exists()) {
+                $errors[] = "Row " . ($i + 2) . " department_code tidak valid";
+                continue;
+            }
+
+            if ((int) $data['cycle_time_sec'] <= 0) {
+                $errors[] = "Row " . ($i + 2) . " cycle_time_sec tidak valid";
+                continue;
+            }
+
+            if (!in_array($status, ['active', 'inactive'], true)) {
+                $errors[] = "Row " . ($i + 2) . " status harus active / inactive";
+                continue;
+            }
+
+            if (
+                MdItem::where('code', $code)
+                    ->where('status', 'active')
+                    ->exists()
+            ) {
+                $errors[] = "Row " . ($i + 2) . " dilewati (code aktif sudah ada)";
+                continue;
+            }
+
+            MdItem::create([
+                'code'            => $code,
+                'name'            => $name,
+                'aisi'            => $data['aisi'] ?? '',
+                'standard'        => $data['standard'] ?? '',
+                'unit_weight'     => is_numeric($data['unit_weight'])
+                    ? (float) $data['unit_weight']
+                    : null,
+                'department_code' => $dept,
+                'cycle_time_sec'  => (int) $data['cycle_time_sec'],
+                'status'          => $status,
+            ]);
+
+            $inserted++;
+        }
+
+        return response()->json([
+            'inserted' => $inserted,
+            'errors'   => $errors,
+        ]);
     }
 }

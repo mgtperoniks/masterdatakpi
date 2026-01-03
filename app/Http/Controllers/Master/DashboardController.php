@@ -7,12 +7,11 @@ use App\Models\MdMachine;
 use App\Models\MdItem;
 use App\Models\MdOperator;
 use App\Models\MdDepartment;
-use App\Services\MasterHealthService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
-    public function index(MasterHealthService $healthService)
+    public function index()
     {
         /**
          * ITEM GUARDRAILS
@@ -53,32 +52,19 @@ class DashboardController extends Controller
         ];
 
         /**
-         * MASTERDATA KPI — HEALTH WIDGET (READ-ONLY)
+         * 🔴 HEALTH CHECK DIMATIKAN TOTAL (WAJIB)
          */
         $healthWidget = [
-            'inactive_items_used' => DB::connection('master')
-                ->table('production_logs')
-                ->whereIn('item_code', function ($q) {
-                    $q->select('code')
-                        ->from('md_items')
-                        ->where('status', 'inactive');
-                })
-                ->count(),
-
-            'inactive_machines_used' => DB::connection('master')
-                ->table('production_logs')
-                ->whereIn('machine_code', function ($q) {
-                    $q->select('code')
-                        ->from('md_machines')
-                        ->where('status', 'inactive');
-                })
-                ->count(),
+            'inactive_items_used'    => 0,
+            'inactive_machines_used' => 0,
         ];
 
-        /**
-         * MASTER HEALTH CHECK (SERVICE)
-         */
-        $healthStatus = $healthService->check();
+        $healthStatus = [
+            'status'  => 'disabled',
+            'message' => 'Health check sementara dinonaktifkan',
+        ];
+
+        Log::warning('MASTER HEALTH CHECK FULLY DISABLED');
 
         return view('master.dashboard.index', [
             'items'        => $items,

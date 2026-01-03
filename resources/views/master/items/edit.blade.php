@@ -55,15 +55,14 @@
 
             {{-- STANDARD --}}
             <div class="mb-3">
-                <label class="form-label">Standard</label>
-                <select name="standard" class="form-select">
-                    @foreach(['JIS','EN','ANSI'] as $std)
-                        <option value="{{ $std }}" @selected($item->standard === $std)>
-                            {{ $std }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+    <label class="form-label">Standard</label>
+    <input type="text"
+           name="standard"
+           class="form-control"
+           value="{{ old('standard', $item->standard) }}"
+           placeholder="Contoh: JIS, EN, ASTM">
+</div>
+
 
             {{-- UNIT WEIGHT --}}
             <div class="mb-3">

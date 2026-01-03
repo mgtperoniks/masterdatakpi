@@ -11,28 +11,22 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Master Items</h4>
 
-    <div class="d-flex gap-2">
-
-        {{-- IMPORT CSV (MANAGE ITEMS) --}}
-        @if (Permission::canManage('items'))
+    @if (Permission::canManage('items'))
+        <div class="d-flex gap-2">
             <a href="{{ route('master.items.import.form') }}"
                class="btn btn-outline-secondary">
                 Import CSV
             </a>
-        @endif
 
-        {{-- ADD ITEM (MANAGE ITEMS) --}}
-        @if (Permission::canManage('items'))
             <a href="{{ route('master.items.create') }}"
                class="btn btn-primary">
                 + Add Item
             </a>
-        @endif
-
-    </div>
+        </div>
+    @endif
 </div>
 
-{{-- HARD STOP WARNING --}}
+{{-- WARNING: INACTIVE ITEMS --}}
 @if ($items->where('status', 'inactive')->count() > 0)
     <div class="alert alert-warning small">
         Ada item <strong>inactive</strong>. Item inactive tidak akan ditarik ke modul KPI.
@@ -58,9 +52,11 @@
 
             @forelse ($items as $item)
                 @php
-                    $ctClass = $item->cycle_time_sec <= 60 ? 'text-success'
-                             : ($item->cycle_time_sec <= 180 ? 'text-warning'
-                             : 'text-danger');
+                    $ctClass = $item->cycle_time_sec <= 60
+                        ? 'text-success'
+                        : ($item->cycle_time_sec <= 180
+                            ? 'text-warning'
+                            : 'text-danger');
                 @endphp
 
                 <tr class="{{ $item->status === 'inactive' ? 'opacity-50' : '' }}">
@@ -85,25 +81,18 @@
                     </td>
 
                     <td>
-                        @if ($item->status === 'inactive')
-                            <span class="badge bg-secondary">Inactive</span>
-                        @else
-                            <span class="badge bg-success">Active</span>
-                        @endif
+                        <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                            {{ ucfirst($item->status) }}
+                        </span>
                     </td>
 
                     <td class="text-end">
-
-                        {{-- EDIT --}}
                         @if (Permission::canManage('items'))
+
                             <a href="{{ route('master.items.edit', $item) }}"
                                class="btn btn-sm btn-outline-primary">
                                 Edit
                             </a>
-                        @endif
-
-                        {{-- ACTIVATE / DEACTIVATE --}}
-                        @if (Permission::canManage('items'))
 
                             @if ($item->status === 'active')
                                 <form method="POST"
@@ -128,9 +117,9 @@
                             @endif
 
                         @endif
-
                     </td>
                 </tr>
+
             @empty
                 <tr>
                     <td colspan="7" class="text-center text-muted py-4">

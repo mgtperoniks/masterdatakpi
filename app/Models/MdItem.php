@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MdItem extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'md_items';
 
     protected $fillable = [
@@ -23,19 +20,19 @@ class MdItem extends Model
         'last_sync_at',
     ];
 
-    /**
-     * Explicit date fields for SoftDeletes
-     */
-    protected $dates = [
-        'deleted_at',
-    ];
-
     protected $casts = [
         'cycle_time_sec' => 'integer',
         'unit_weight'    => 'decimal:3',
         'last_sync_at'   => 'datetime',
-        'deleted_at'     => 'datetime',
     ];
+
+    /**
+     * Scope: hanya item aktif
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
 
     /**
      * Relation: Department

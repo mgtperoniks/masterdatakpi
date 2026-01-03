@@ -55,14 +55,16 @@
 
             {{-- STANDARD --}}
             <div class="mb-3">
-                <label class="form-label">Standard</label>
-                <select name="standard" class="form-select">
-                    <option value="">-- Select --</option>
-                    <option value="JIS"  {{ old('standard') === 'JIS' ? 'selected' : '' }}>JIS</option>
-                    <option value="EN"   {{ old('standard') === 'EN' ? 'selected' : '' }}>EN</option>
-                    <option value="ANSI" {{ old('standard') === 'ANSI' ? 'selected' : '' }}>ANSI</option>
-                </select>
-            </div>
+    <label class="form-label">Standard</label>
+    <input type="text"
+           name="standard"
+           class="form-control"
+           placeholder="Contoh: JIS, EN, ASTM, ASME">
+    <small class="text-muted">
+        Bebas diisi. Bisa diubah di kemudian hari.
+    </small>
+</div>
+
 
             {{-- UNIT WEIGHT --}}
             <div class="mb-3">
