@@ -23,7 +23,9 @@ class ItemImportController extends Controller
         $rows = array_map('str_getcsv', file($request->file->getRealPath()));
 
         if (count($rows) < 2) {
-            return response()->json(['error' => 'File CSV kosong'], 422);
+            return redirect()
+                ->route('master.items.index')
+                ->with('error', 'File CSV kosong');
         }
 
         $header = array_map(
@@ -44,9 +46,9 @@ class ItemImportController extends Controller
 
         foreach ($required as $col) {
             if (!in_array($col, $header, true)) {
-                return response()->json([
-                    'error' => "Kolom CSV wajib tidak ditemukan: {$col}"
-                ], 422);
+                return redirect()
+                    ->route('master.items.index')
+                    ->with('error', "Kolom CSV wajib tidak ditemukan: {$col}");
             }
         }
 
@@ -113,9 +115,9 @@ class ItemImportController extends Controller
             $inserted++;
         }
 
-        return response()->json([
-            'inserted' => $inserted,
-            'errors'   => $errors,
-        ]);
+        return redirect()
+            ->route('master.items.index')
+            ->with('success', "Import selesai. {$inserted} item berhasil ditambahkan.")
+            ->with('import_errors', $errors);
     }
 }

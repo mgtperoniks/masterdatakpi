@@ -9,10 +9,42 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Master Departments</h4>
 
-    <a href="{{ route('master.departments.create') }}" class="btn btn-primary">
+    <a href="{{ route('master.departments.create') }}"
+       class="btn btn-primary">
         + Add Department
     </a>
 </div>
+
+{{-- 🔍 SEARCH & FILTER --}}
+<form method="GET" class="row g-2 mb-3">
+
+    <div class="col-md-4">
+        <input type="text"
+               name="q"
+               value="{{ request('q') }}"
+               class="form-control"
+               placeholder="Search code / name">
+    </div>
+
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">-- All Status --</option>
+            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>
+                Active
+            </option>
+            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>
+                Inactive
+            </option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">
+            Filter
+        </button>
+    </div>
+
+</form>
 
 {{-- Empty State --}}
 @if ($departments->isEmpty())
@@ -22,7 +54,8 @@
             <p class="text-muted small mb-3">
                 Master Department belum diisi.
             </p>
-            <a href="{{ route('master.departments.create') }}" class="btn btn-primary">
+            <a href="{{ route('master.departments.create') }}"
+               class="btn btn-primary">
                 + Add Department
             </a>
         </div>
@@ -48,11 +81,9 @@
                         <td>{{ $department->code }}</td>
                         <td>{{ $department->name }}</td>
                         <td>
-                            @if ($department->status === 'inactive')
-                                <span class="badge bg-secondary">Inactive</span>
-                            @else
-                                <span class="badge bg-success">Active</span>
-                            @endif
+                            <span class="badge {{ $department->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                {{ ucfirst($department->status) }}
+                            </span>
                         </td>
                         <td class="text-end">
 
@@ -93,6 +124,12 @@
 
     </div>
 </div>
+
+{{-- 📄 PAGINATION --}}
+<div class="mt-3">
+    {{ $departments->links() }}
+</div>
+
 @endif
 
 @endsection

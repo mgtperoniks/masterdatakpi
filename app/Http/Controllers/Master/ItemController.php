@@ -11,23 +11,36 @@ class ItemController extends Controller
 {
     /**
      * Display a listing of the items.
-     * Index boleh tampil ACTIVE & INACTIVE
+     * Index tampil ACTIVE & INACTIVE
+     * Support: search, filter, pagination
      */
     public function index(Request $request)
     {
         $query = MdItem::query();
 
+        // 🔍 Search (code / name)
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('code', 'like', "%{$q}%")
+                    ->orWhere('name', 'like', "%{$q}%");
+            });
+        }
+
+        // 🏭 Filter Department
         if ($request->filled('department_code')) {
             $query->where('department_code', $request->department_code);
         }
 
+        // 🔄 Filter Status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         $items = $query
             ->orderBy('code')
-            ->get();
+            ->paginate(20)       // ✅ WAJIB: pagination
+            ->withQueryString(); // ✅ jaga query saat pindah halaman
 
         $departments = MdDepartment::orderBy('code')->get();
 
@@ -36,7 +49,6 @@ class ItemController extends Controller
 
     /**
      * Show the form for creating a new item.
-     * Dropdown department → hanya ACTIVE (hard guard)
      */
     public function create()
     {

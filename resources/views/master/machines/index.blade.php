@@ -8,12 +8,56 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">Master Machines</h4>
 
-    <a href="{{ route('master.machines.create') }}" class="btn btn-primary">
+    <a href="{{ route('master.machines.create') }}"
+       class="btn btn-primary">
         + Add Machine
     </a>
 </div>
 
-{{-- HARD STOP WARNING --}}
+{{-- 🔍 FILTER BAR --}}
+<form method="GET" class="row g-2 mb-3">
+
+    <div class="col-md-4">
+        <input type="text"
+               name="q"
+               value="{{ request('q') }}"
+               class="form-control"
+               placeholder="Search code / name">
+    </div>
+
+    <div class="col-md-3">
+        <select name="department_code" class="form-select">
+            <option value="">-- All Departments --</option>
+            @foreach ($departments as $dept)
+                <option value="{{ $dept->code }}"
+                    {{ request('department_code') === $dept->code ? 'selected' : '' }}>
+                    {{ $dept->code }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>
+                Active
+            </option>
+            <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>
+                Inactive
+            </option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">
+            Filter
+        </button>
+    </div>
+
+</form>
+
+{{-- ⚠️ HARD STOP WARNING --}}
 @if ($machines->where('status', 'inactive')->count() > 0)
     <div class="alert alert-warning small">
         Ada <strong>Machine inactive</strong>. Machine inactive tidak akan ditarik ke modul KPI
@@ -28,7 +72,8 @@
             <p class="text-muted small mb-3">
                 Master Machine belum diisi.
             </p>
-            <a href="{{ route('master.machines.create') }}" class="btn btn-primary">
+            <a href="{{ route('master.machines.create') }}"
+               class="btn btn-primary">
                 + Add Machine
             </a>
         </div>
@@ -56,13 +101,11 @@
                             <td>{{ $machine->department->name ?? '-' }}</td>
                             <td>{{ $machine->line->name ?? '-' }}</td>
 
-                            {{-- STATUS DB (MASTER LIFECYCLE) --}}
+                            {{-- STATUS DB --}}
                             <td>
-                                @if ($machine->status === 'inactive')
-                                    <span class="badge bg-secondary">Inactive</span>
-                                @else
-                                    <span class="badge bg-success">Active</span>
-                                @endif
+                                <span class="badge {{ $machine->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ ucfirst($machine->status) }}
+                                </span>
                             </td>
 
                             {{-- STATUS MESIN (RUNTIME / COMPUTED) --}}
@@ -117,6 +160,11 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    {{-- 📄 PAGINATION --}}
+    <div class="mt-3">
+        {{ $machines->links() }}
     </div>
 @endif
 

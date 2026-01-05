@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-2">
     <h4 class="mb-0">Master Operators</h4>
 
     <a href="{{ route('master.operators.create') }}"
@@ -14,11 +14,60 @@
     </a>
 </div>
 
-{{-- WARNING JIKA ADA OPERATOR INACTIVE --}}
+{{-- 🔍 SEARCH & FILTER --}}
+<form method="GET" class="row g-2 mb-3">
+
+    <div class="col-md-4">
+        <input type="text"
+               name="q"
+               value="{{ request('q') }}"
+               class="form-control"
+               placeholder="Search code or name...">
+    </div>
+
+    <div class="col-md-3">
+        <select name="department_code" class="form-select">
+            <option value="">-- All Departments --</option>
+            @foreach ($departments as $dept)
+                <option value="{{ $dept->code }}"
+                    {{ request('department_code') == $dept->code ? 'selected' : '' }}>
+                    {{ $dept->code }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">-- All Status --</option>
+            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>
+                Active
+            </option>
+            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
+                Inactive
+            </option>
+        </select>
+    </div>
+
+    <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-primary">
+            Filter
+        </button>
+
+        <a href="{{ route('master.operators.index') }}"
+           class="btn btn-outline-secondary">
+            Reset
+        </a>
+    </div>
+
+</form>
+
+{{-- ⚠️ WARNING JIKA ADA OPERATOR INACTIVE --}}
 @if ($operators->where('status', 'inactive')->count() > 0)
     <div class="alert alert-warning small">
-        Terdapat <strong>operator inactive</strong>. Operator inactive tidak akan
-        digunakan dalam modul KPI dan perhitungan performa.
+        Terdapat <strong>operator inactive</strong>.
+        Operator inactive tidak akan digunakan dalam modul KPI
+        dan perhitungan performa.
     </div>
 @endif
 
@@ -101,6 +150,23 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    {{-- 📄 PAGINATION --}}
+    <div class="mt-3 d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+            Showing
+            {{ $operators->firstItem() }}
+            –
+            {{ $operators->lastItem() }}
+            of
+            {{ $operators->total() }}
+            operators
+        </div>
+
+        <div>
+            {{ $operators->links() }}
         </div>
     </div>
 @endif

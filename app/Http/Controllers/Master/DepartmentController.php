@@ -13,11 +13,30 @@ class DepartmentController extends Controller
 
     /**
      * Display a listing of departments.
-     * Index tampil ACTIVE & INACTIVE
+     * Support: search, filter, pagination
      */
-    public function index()
+    public function index(Request $request)
     {
-        $departments = MdDepartment::orderBy('code')->get();
+        $query = MdDepartment::query();
+
+        // 🔍 Search code / name
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('code', 'like', "%{$q}%")
+                    ->orWhere('name', 'like', "%{$q}%");
+            });
+        }
+
+        // 🔄 Filter Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $departments = $query
+            ->orderBy('code')
+            ->paginate(20)        // ✅ pagination
+            ->withQueryString(); // ✅ jaga query saat pindah halaman
 
         return view('master.departments.index', compact('departments'));
     }

@@ -26,7 +26,55 @@
     @endif
 </div>
 
-{{-- WARNING: INACTIVE ITEMS --}}
+{{-- 🔍 SEARCH & FILTER --}}
+<form method="GET" class="row g-2 mb-3">
+
+    <div class="col-md-4">
+        <input type="text"
+               name="q"
+               value="{{ request('q') }}"
+               class="form-control"
+               placeholder="Search code or name...">
+    </div>
+
+    <div class="col-md-3">
+        <select name="department_code" class="form-select">
+            <option value="">-- All Departments --</option>
+            @foreach ($departments as $dept)
+                <option value="{{ $dept->code }}"
+                    {{ request('department_code') == $dept->code ? 'selected' : '' }}>
+                    {{ $dept->code }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="status" class="form-select">
+            <option value="">-- All Status --</option>
+            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>
+                Active
+            </option>
+            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
+                Inactive
+            </option>
+        </select>
+    </div>
+
+    <div class="col-md-3 d-flex gap-2">
+        <button class="btn btn-primary">
+            Filter
+        </button>
+
+        <a href="{{ route('master.items.index') }}"
+           class="btn btn-outline-secondary">
+            Reset
+        </a>
+    </div>
+
+</form>
+
+{{-- ⚠️ WARNING: INACTIVE ITEMS --}}
 @if ($items->where('status', 'inactive')->count() > 0)
     <div class="alert alert-warning small">
         Ada item <strong>inactive</strong>. Item inactive tidak akan ditarik ke modul KPI.
@@ -62,9 +110,7 @@
                 <tr class="{{ $item->status === 'inactive' ? 'opacity-50' : '' }}">
 
                     <td>{{ $item->name }}</td>
-
                     <td>{{ $item->aisi ?? '-' }}</td>
-
                     <td>{{ $item->standard ?? '-' }}</td>
 
                     <td>
@@ -133,5 +179,36 @@
 
     </div>
 </div>
+
+{{-- 📄 PAGINATION --}}
+<div class="mt-3 d-flex justify-content-between align-items-center">
+    <div class="text-muted small">
+        Showing
+        {{ $items->firstItem() }}
+        –
+        {{ $items->lastItem() }}
+        of
+        {{ $items->total() }}
+        items
+    </div>
+
+    <div>
+        {{ $items->links() }}
+    </div>
+</div>
+
+{{-- ✅ FIX: Pagination arrow terlalu besar --}}
+<style>
+    .pagination .page-link {
+        font-size: 0.875rem;
+        padding: 0.375rem 0.75rem;
+        line-height: 1.25;
+    }
+
+    .pagination svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+</style>
 
 @endsection

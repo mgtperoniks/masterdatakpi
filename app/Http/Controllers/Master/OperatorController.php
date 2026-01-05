@@ -12,14 +12,42 @@ class OperatorController extends Controller
 {
     /**
      * Display a listing of operators.
+     * Support: search, filter, pagination
      */
-    public function index()
+    public function index(Request $request)
     {
-        $operators = MdOperator::orderBy('code')
-            ->orderByDesc('employment_seq')
-            ->get();
+        $query = MdOperator::query();
 
-        return view('master.operators.index', compact('operators'));
+        // 🔍 Search code / name
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('code', 'like', "%{$q}%")
+                    ->orWhere('name', 'like', "%{$q}%");
+            });
+        }
+
+        // 🏭 Filter Department
+        if ($request->filled('department_code')) {
+            $query->where('department_code', $request->department_code);
+        }
+
+        // 🔄 Filter Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $operators = $query
+            ->orderBy('code')
+            ->paginate(20)        // ✅ pagination
+            ->withQueryString(); // ✅ jaga query saat pindah halaman
+
+        $departments = MdDepartment::orderBy('code')->get();
+
+        return view(
+            'master.operators.index',
+            compact('operators', 'departments')
+        );
     }
 
     /**
@@ -47,7 +75,6 @@ class OperatorController extends Controller
 
         DB::transaction(function () use ($request) {
 
-            // Pastikan tidak ada operator ACTIVE dengan code yang sama
             $activeExists = MdOperator::where('code', $request->code)
                 ->where('status', 'active')
                 ->exists();
@@ -56,7 +83,6 @@ class OperatorController extends Controller
                 abort(422, 'Kode operator masih aktif. Nonaktifkan terlebih dahulu.');
             }
 
-            // Ambil employment_seq terakhir
             $lastSeq = MdOperator::where('code', $request->code)
                 ->max('employment_seq');
 
@@ -79,7 +105,6 @@ class OperatorController extends Controller
 
     /**
      * Show the form for editing the specified operator.
-     * PATCH: kirim $departments (fix undefined variable)
      */
     public function edit(MdOperator $operator)
     {
@@ -94,7 +119,7 @@ class OperatorController extends Controller
     }
 
     /**
-     * Update operator (name, department, status).
+     * Update operator.
      */
     public function update(Request $request, MdOperator $operator)
     {
@@ -143,7 +168,6 @@ class OperatorController extends Controller
                 return;
             }
 
-            // Pastikan tidak ada operator ACTIVE dengan code yang sama
             $activeExists = MdOperator::where('code', $old->code)
                 ->where('status', 'active')
                 ->exists();

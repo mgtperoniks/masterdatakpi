@@ -15,15 +15,42 @@ class MachineController extends Controller
 
     /**
      * Display a listing of machines.
-     * Index boleh tampil ACTIVE & INACTIVE
+     * Support: search, filter, pagination
      */
-    public function index()
+    public function index(Request $request)
     {
-        $machines = MdMachine::with(['department', 'line'])
-            ->orderBy('code')
-            ->get();
+        $query = MdMachine::with(['department', 'line']);
 
-        return view('master.machines.index', compact('machines'));
+        // 🔍 Search code / name
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('code', 'like', "%{$q}%")
+                    ->orWhere('name', 'like', "%{$q}%");
+            });
+        }
+
+        // 🏭 Filter Department
+        if ($request->filled('department_code')) {
+            $query->where('department_code', $request->department_code);
+        }
+
+        // 🔄 Filter Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $machines = $query
+            ->orderBy('code')
+            ->paginate(20)        // ✅ pagination
+            ->withQueryString(); // ✅ jaga query saat pindah halaman
+
+        $departments = MdDepartment::orderBy('code')->get();
+
+        return view(
+            'master.machines.index',
+            compact('machines', 'departments')
+        );
     }
 
     /**
@@ -84,7 +111,10 @@ class MachineController extends Controller
             ->orderBy('code')
             ->get();
 
-        return view('master.machines.edit', compact('machine', 'departments', 'lines'));
+        return view(
+            'master.machines.edit',
+            compact('machine', 'departments', 'lines')
+        );
     }
 
     /**

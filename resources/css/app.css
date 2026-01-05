@@ -1,3 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* =====================================================
+   FIX LARAVEL PAGINATION ICON SIZE (GLOBAL)
+   ===================================================== */
+
+/* Normalisasi pagination */
+.pagination {
+    font-size: 0.875rem; /* 14px */
+}
+
+/* Button pagination */
+.pagination .page-link {
+    padding: 0.375rem 0.75rem;
+    line-height: 1.25;
+}
+
+/* ICON SVG (Previous / Next) */
+.pagination .page-link svg {
+    width: 14px !important;
+    height: 14px !important;
+    vertical-align: middle;
+}
+
+/* Jika masih besar (tema agresif) */
+.pagination .page-item:first-child .page-link svg,
+.pagination .page-item:last-child .page-link svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+.pagination * {
+    font-size: 0.875rem !important;
+}
+
+.pagination svg {
+    max-width: 14px !important;
+    max-height: 14px !important;
+}
