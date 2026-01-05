@@ -16,18 +16,26 @@ class MdOperator extends Model
         'code',
         'name',
         'department_code',
+        'position',
+        'gender',
+        'employment_type',
+        'join_date',
         'employment_seq',
         'status',
         'active_from',
         'active_until',
+        'inactive_at',
+        'inactive_reason',
     ];
 
     /**
      * Attribute casting
      */
     protected $casts = [
+        'join_date'    => 'date',
         'active_from'  => 'date',
         'active_until' => 'date',
+        'inactive_at'  => 'date',
     ];
 
     /* =========================
@@ -64,7 +72,7 @@ class MdOperator extends Model
     }
 
     /**
-     * Scope operators active by date range
+     * Scope operators currently active by date
      */
     public function scopeCurrentlyActive(Builder $query): Builder
     {

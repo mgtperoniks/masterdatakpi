@@ -30,8 +30,8 @@
             <option value="">-- All Departments --</option>
             @foreach ($departments as $dept)
                 <option value="{{ $dept->code }}"
-                    {{ request('department_code') == $dept->code ? 'selected' : '' }}>
-                    {{ $dept->code }}
+                    @selected(request('department_code') == $dept->code)>
+                    {{ $dept->code }} – {{ $dept->name }}
                 </option>
             @endforeach
         </select>
@@ -40,10 +40,10 @@
     <div class="col-md-2">
         <select name="status" class="form-select">
             <option value="">-- All Status --</option>
-            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>
+            <option value="active" @selected(request('status') == 'active')>
                 Active
             </option>
-            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>
+            <option value="inactive" @selected(request('status') == 'inactive')>
                 Inactive
             </option>
         </select>
@@ -62,7 +62,7 @@
 
 </form>
 
-{{-- ⚠️ WARNING JIKA ADA OPERATOR INACTIVE --}}
+{{-- ⚠️ WARNING --}}
 @if ($operators->where('status', 'inactive')->count() > 0)
     <div class="alert alert-warning small">
         Terdapat <strong>operator inactive</strong>.
@@ -92,6 +92,7 @@
                     <tr>
                         <th>Code</th>
                         <th>Name</th>
+                        <th>Department</th>
                         <th>Seq</th>
                         <th>Active Period</th>
                         <th>Status</th>
@@ -99,42 +100,44 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($operators as $operator)
-                        <tr class="{{ $operator->status === 'inactive' ? 'opacity-50' : '' }}">
-                            <td>{{ $operator->code }}</td>
-                            <td>{{ $operator->name }}</td>
-                            <td>{{ $operator->employment_seq }}</td>
+                    @foreach ($operators as $op)
+                        <tr class="{{ $op->status === 'inactive' ? 'opacity-50' : '' }}">
+                            <td>{{ $op->code }}</td>
+                            <td>{{ $op->name }}</td>
+                            <td>
+                                {{ $op->department->code ?? '-' }}
+                                –
+                                {{ $op->department->name ?? '-' }}
+                            </td>
+                            <td>{{ $op->employment_seq }}</td>
                             <td class="small">
-                                {{ $operator->active_from ?? '-' }}
+                                {{ $op->active_from ?? '-' }}
                                 →
-                                {{ $operator->active_until ?? 'Present' }}
+                                {{ $op->active_until ?? 'Present' }}
                             </td>
                             <td>
-                                <span class="badge bg-{{ $operator->status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ ucfirst($operator->status) }}
+                                <span class="badge bg-{{ $op->status === 'active' ? 'success' : 'secondary' }}">
+                                    {{ ucfirst($op->status) }}
                                 </span>
                             </td>
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1">
 
-                                    <a href="{{ route('master.operators.edit', $operator->id) }}"
+                                    <a href="{{ route('master.operators.edit', $op->id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         Edit
                                     </a>
 
-                                    @if ($operator->status === 'active')
-                                        <form method="POST"
-                                              action="{{ route('master.operators.deactivate', $operator->id) }}">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-warning"
-                                                    onclick="return confirm('Nonaktifkan operator ini?')">
-                                                Deactivate
-                                            </button>
-                                        </form>
+                                    @if ($op->status === 'active')
+                                        <button
+                                            class="btn btn-sm btn-warning"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deactivateModal{{ $op->id }}">
+                                            Deactivate
+                                        </button>
                                     @else
                                         <form method="POST"
-                                              action="{{ route('master.operators.activate', $operator->id) }}">
+                                              action="{{ route('master.operators.activate', $op->id) }}">
                                             @csrf
                                             <button type="submit"
                                                     class="btn btn-sm btn-success"
@@ -147,6 +150,70 @@
                                 </div>
                             </td>
                         </tr>
+
+                        {{-- 🔴 MODAL DEACTIVATE (WAJIB) --}}
+                        <div class="modal fade"
+                             id="deactivateModal{{ $op->id }}"
+                             tabindex="-1">
+                            <div class="modal-dialog">
+                                <form method="POST"
+                                      action="{{ route('master.operators.deactivate.confirm', $op) }}">
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                Deactivate Operator
+                                            </h5>
+                                            <button type="button"
+                                                    class="btn-close"
+                                                    data-bs-dismiss="modal"></button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            <p class="mb-3">
+                                                <strong>
+                                                    {{ $op->code }} – {{ $op->name }}
+                                                </strong>
+                                            </p>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">
+                                                    Last Working Date
+                                                </label>
+                                                <input type="date"
+                                                       name="inactive_at"
+                                                       class="form-control"
+                                                       required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">
+                                                    Reason
+                                                </label>
+                                                <textarea name="inactive_reason"
+                                                          class="form-control"
+                                                          rows="3"
+                                                          required></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button"
+                                                    class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">
+                                                Cancel
+                                            </button>
+                                            <button class="btn btn-danger">
+                                                Confirm
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                     @endforeach
                 </tbody>
             </table>

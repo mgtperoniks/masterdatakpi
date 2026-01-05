@@ -113,22 +113,18 @@ Route::middleware(['auth'])->group(function () {
         | Items (CUSTOM ROUTE HARUS DI ATAS RESOURCE)
         |--------------------------------------------------------------------------
         */
-
-        // Item Import
         Route::get('items/import', [ItemImportController::class, 'form'])
             ->name('items.import.form');
 
         Route::post('items/import', [ItemImportController::class, 'import'])
             ->name('items.import');
 
-        // Item Lifecycle
         Route::patch('items/{item}/deactivate', [ItemController::class, 'deactivate'])
             ->name('items.deactivate');
 
         Route::patch('items/{item}/activate', [ItemController::class, 'activate'])
             ->name('items.activate');
 
-        // Resource Items
         Route::resource('items', ItemController::class)
             ->except(['show', 'destroy']);
 
@@ -137,6 +133,14 @@ Route::middleware(['auth'])->group(function () {
         | Operators (DESAIN BERBEDA — JANGAN DIUBAH)
         |--------------------------------------------------------------------------
         */
+
+        // ✅ ROUTE BARU (WAJIB) — DEACTIVATE DENGAN KONFIRMASI
+        Route::patch(
+            'operators/{operator}/deactivate-confirm',
+            [OperatorController::class, 'confirmDeactivate']
+        )->name('operators.deactivate.confirm');
+
+        // Legacy activate / deactivate (tetap dipertahankan)
         Route::post('operators/{id}/deactivate', [OperatorController::class, 'deactivate'])
             ->name('operators.deactivate');
 
