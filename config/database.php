@@ -55,6 +55,20 @@ return [
                 : [],
         ],
 
+        'bubut' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_BUBUT', '127.0.0.1'),
+            'port' => env('DB_PORT_BUBUT', '3306'),
+            'database' => env('DB_DATABASE_BUBUT', 'kpi_bubut'),
+            'username' => env('DB_USERNAME_BUBUT', 'root'),
+            'password' => env('DB_PASSWORD_BUBUT', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

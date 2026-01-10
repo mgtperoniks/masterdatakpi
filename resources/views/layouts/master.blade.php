@@ -1,71 +1,137 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
+
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Master Data KPI')</title>
 
-    {{-- CSS --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563EB",
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#0F172A",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#111827",
+                        "active": "#22C55E",
+                        "inactive": "#F59E0B",
+                        "archived": "#64748B"
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                    },
+                },
+            },
+        };
+    </script>
     <style>
         body {
-            background: #f5f7fb;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* ==============================
-           Sidebar Layout
-        ============================== */
-        .sidebar {
-            width: 240px;
-            min-height: 100vh;
-            background: #1f2937;
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
-        .sidebar .nav-link {
-            color: #cbd5e1;
-            text-decoration: none;
-            display: block;
-            padding: 10px 16px;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            transition: background-color .15s ease-in-out, color .15s ease-in-out;
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
         }
 
-        /* ==============================
-           Sidebar Active & Hover State
-        ============================== */
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background-color: #2563eb;
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        /* ==============================
-           Main Content
-        ============================== */
-        .content-wrapper {
-            padding: 24px;
+        [x-cloak] {
+            display: none !important;
         }
     </style>
+    @stack('styles')
 </head>
-<body>
 
-<div class="d-flex">
-    {{-- SIDEBAR --}}
-    @include('layouts.partials.sidebar')
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24 lg:pb-0">
 
-    {{-- MAIN --}}
-    <div class="flex-grow-1">
-        @include('layouts.partials.topbar')
+    <div class="flex min-h-screen">
+        {{-- Desktop Sidebar --}}
+        <aside class="hidden lg:flex flex-col w-64 bg-card-dark text-white sticky top-0 h-screen">
+            @include('layouts.partials.sidebar_new')
+        </aside>
 
-        <div class="content-wrapper">
-            @yield('content')
+        {{-- Main Content --}}
+        <div class="flex-1 flex flex-col">
+            {{-- Top Header --}}
+            <header class="bg-primary px-5 py-4 flex items-center justify-between sticky top-0 z-50">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 p-2 rounded-lg lg:hidden">
+                        <span class="material-icons text-white">grid_view</span>
+                    </div>
+                    <div>
+                        <h1 class="text-white font-bold text-lg leading-tight lg:text-xl">
+                            @yield('header_title', 'Master Data')</h1>
+                        <p class="text-white/70 text-xs">KPI System Hub</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="text-white p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <span class="material-icons">notifications</span>
+                    </button>
+                    {{-- User Profile / Logout --}}
+                    <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <span class="material-icons text-white text-sm">person</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 px-5 py-6 lg:px-8">
+                @yield('content')
+            </main>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- Bottom Nav (Mobile) --}}
+    <nav
+        class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 safe-area-bottom px-6 py-3 flex justify-between items-center z-50">
+        <a href="{{ route('dashboard') }}"
+            class="flex flex-col items-center gap-1 {{ request()->routeIs('dashboard') ? 'text-primary' : 'text-slate-400' }}">
+            <span class="material-icons">dashboard</span>
+            <span class="text-[10px] font-bold">Dashboard</span>
+        </a>
+        <a href="{{ route('master.items.index') }}"
+            class="flex flex-col items-center gap-1 {{ request()->routeIs('master.items.*') ? 'text-primary' : 'text-slate-400' }}">
+            <span class="material-icons">category</span>
+            <span class="text-[10px] font-medium">Items</span>
+        </a>
+        <a href="{{ route('master.machines.index') }}"
+            class="flex flex-col items-center gap-1 {{ request()->routeIs('master.machines.*') ? 'text-primary' : 'text-slate-400' }}">
+            <span class="material-icons">precision_manufacturing</span>
+            <span class="text-[10px] font-medium">Machines</span>
+        </a>
+        <a href="{{ route('master.operators.index') }}"
+            class="flex flex-col items-center gap-1 {{ request()->routeIs('master.operators.*') ? 'text-primary' : 'text-slate-400' }}">
+            <span class="material-icons">person_search</span>
+            <span class="text-[10px] font-medium">Operators</span>
+        </a>
+        <a href="{{ route('master.heat-numbers.index') }}"
+            class="flex flex-col items-center gap-1 {{ request()->routeIs('master.heat-numbers.*') ? 'text-primary' : 'text-slate-400' }}">
+            <span class="material-icons">qr_code</span>
+            <span class="text-[10px] font-medium">Heat</span>
+        </a>
+    </nav>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @stack('scripts')
 </body>
+
 </html>

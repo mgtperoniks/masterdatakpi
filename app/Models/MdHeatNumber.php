@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class MdHeatNumber extends Model
+{
+    protected $table = 'md_heat_numbers';
+
+    protected $fillable = [
+        'kode_produksi',
+        'item_code',
+        'item_name',
+        'heat_number',
+        'cor_qty',
+        'status',
+    ];
+
+    /**
+     * Scope: Active Only
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Relation to Item (Optional if needed)
+     */
+    public function item()
+    {
+        return $this->belongsTo(MdItem::class, 'item_code', 'code');
+    }
+}

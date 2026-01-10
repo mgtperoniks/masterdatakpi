@@ -14,8 +14,10 @@ use App\Http\Controllers\Master\LineController;
 use App\Http\Controllers\Master\MachineController;
 use App\Http\Controllers\Master\ItemController;
 use App\Http\Controllers\Master\OperatorController;
+use App\Http\Controllers\Master\MdHeatNumberController;
 use App\Http\Controllers\Master\AuditLogController;
 use App\Http\Controllers\Master\ItemImportController;
+use App\Http\Controllers\Master\TrendAnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,6 +67,12 @@ Route::middleware(['auth'])->group(function () {
         */
         Route::get('dashboard', [DashboardController::class, 'index'])
             ->name('dashboard');
+
+        Route::get('trend-analytics', [TrendAnalyticsController::class, 'index'])
+            ->name('trend-analytics');
+
+        Route::post('trend-analytics/report', [TrendAnalyticsController::class, 'generateReport'])
+            ->name('trend-analytics.report');
 
         /*
         |--------------------------------------------------------------------------
@@ -149,6 +157,23 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('operators', OperatorController::class)
             ->except(['show', 'destroy']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Heat Numbers
+        |--------------------------------------------------------------------------
+        */
+        Route::controller(MdHeatNumberController::class)->prefix('heat-numbers')->name('heat-numbers.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/import', 'import')->name('import');
+            Route::post('/bulk-store', 'bulkStore')->name('bulk-store');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+            Route::get('/{heatNumber}/edit', 'edit')->name('edit');
+            Route::put('/{heatNumber}', 'update')->name('update');
+            Route::patch('/{heatNumber}/deactivate', 'deactivate')->name('deactivate');
+            Route::patch('/{heatNumber}/activate', 'activate')->name('activate');
+        });
 
         /*
         |--------------------------------------------------------------------------

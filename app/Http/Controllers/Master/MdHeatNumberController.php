@@ -1,0 +1,191 @@
+<?php
+
+namespace App\Http\Controllers\Master;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\MdHeatNumber;
+use App\Models\MdItem;
+
+class MdHeatNumberController extends Controller
+{
+    /**
+     * Display a listing of the heat numbers.
+     */
+    public function index(Request $request)
+    {
+        $query = MdHeatNumber::query();
+
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('heat_number', 'like', "%{$q}%")
+                    ->orWhere('item_code', 'like', "%{$q}%")
+                    ->orWhere('item_name', 'like', "%{$q}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $heatNumbers = $query
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('master.heat_numbers.index', compact('heatNumbers'));
+    }
+
+    /**
+     * Show the form for creating a new heat number.
+     */
+    public function create()
+    {
+        $items = MdItem::active()->orderBy('code')->get();
+        return view('master.heat_numbers.create', compact('items'));
+    }
+
+    /**
+     * Store a newly created heat number.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'kode_produksi' => 'nullable|string|max:50',
+            'item_code' => 'required|string|exists:md_items,code',
+            'heat_number' => 'required|string|max:50|unique:md_heat_numbers,heat_number',
+            'cor_qty' => 'required|integer|min:0',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        // Auto-fetch item name for denormalization
+        $item = MdItem::where('code', $validated['item_code'])->first();
+        $validated['item_name'] = $item->name;
+
+        MdHeatNumber::create($validated);
+
+        return redirect()
+            ->route('master.heat-numbers.index')
+            ->with('success', 'Heat Number berhasil ditambahkan.');
+    }
+
+    /**
+     * Show the form for editing the specified heat number.
+     */
+    public function edit(MdHeatNumber $heatNumber)
+    {
+        $items = MdItem::active()->orderBy('code')->get();
+        return view('master.heat_numbers.edit', compact('heatNumber', 'items'));
+    }
+
+    /**
+     * Update the specified heat number in storage.
+     */
+    public function update(Request $request, MdHeatNumber $heatNumber)
+    {
+        $validated = $request->validate([
+            'kode_produksi' => 'nullable|string|max:50',
+            'item_code' => 'required|string|exists:md_items,code',
+            'heat_number' => 'required|string|max:50|unique:md_heat_numbers,heat_number,' . $heatNumber->id,
+            'cor_qty' => 'required|integer|min:0',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $item = MdItem::where('code', $validated['item_code'])->first();
+        $validated['item_name'] = $item->name;
+
+        $heatNumber->update($validated);
+
+        return redirect()
+            ->route('master.heat-numbers.index')
+            ->with('success', 'Heat Number berhasil diperbarui.');
+    }
+
+    /**
+     * Deactivate heat number.
+     */
+    public function deactivate(MdHeatNumber $heatNumber)
+    {
+        $heatNumber->update(['status' => 'inactive']);
+        return back()->with('success', 'Heat Number dinonaktifkan.');
+    }
+
+    /**
+     * Activate heat number.
+     */
+    public function activate($heatNumber)
+    {
+        $hn = MdHeatNumber::findOrFail($heatNumber);
+        $hn->update(['status' => 'active']);
+
+        return back()->with('success', "Heat Number {$hn->heat_number} activated.");
+    }
+
+    /**
+     * Import Page (Handsontable Grid)
+     */
+    public function import()
+    {
+        return view('master.heat_numbers.import');
+    }
+
+    /**
+     * Bulk Store from Grid
+     */
+    public function bulkStore(Request $request)
+    {
+        $request->validate([
+            'data' => 'required|array',
+        ]);
+
+        $rows = $request->input('data');
+        $successCount = 0;
+        $errors = [];
+
+        foreach ($rows as $index => $row) {
+            // Basic validation for required fields in the row
+            $heat_number = trim($row['heat_number'] ?? '');
+            $item_code = trim($row['item_code'] ?? '');
+            $cor_qty = $row['cor_qty'] ?? 0;
+            $kode_prod = trim($row['kode_produksi'] ?? '');
+
+            if (empty($heat_number) || empty($item_code)) {
+                // Skip empty rows if any
+                if (empty($heat_number) && empty($item_code))
+                    continue;
+                $errors[] = "Baris " . ($index + 1) . ": Heat Number and Item Code are required.";
+                continue;
+            }
+
+            // Lookup Item Name
+            $item = \App\Models\MdItem::where('code', $item_code)->first();
+            if (!$item) {
+                $errors[] = "Baris " . ($index + 1) . ": Item Code [{$item_code}] not found.";
+                continue;
+            }
+
+            try {
+                MdHeatNumber::updateOrCreate(
+                    ['heat_number' => $heat_number],
+                    [
+                        'item_code' => $item->code,
+                        'item_name' => $item->name,
+                        'cor_qty' => (int) $cor_qty,
+                        'kode_produksi' => $kode_prod,
+                        'status' => 'active',
+                    ]
+                );
+                $successCount++;
+            } catch (\Exception $e) {
+                $errors[] = "Baris " . ($index + 1) . ": Error: " . $e->getMessage();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully imported {$successCount} records.",
+            'errors' => $errors
+        ]);
+    }
+}

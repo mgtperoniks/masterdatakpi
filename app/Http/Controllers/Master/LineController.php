@@ -20,7 +20,7 @@ class LineController extends Controller
     {
         $lines = MdLine::with('department')
             ->orderBy('code')
-            ->get();
+            ->paginate(10);
 
         return view('master.lines.index', compact('lines'));
     }
@@ -44,10 +44,10 @@ class LineController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'code'            => 'required|string|max:20|unique:md_lines,code',
+            'code' => 'required|string|max:20|unique:md_lines,code',
             'department_code' => 'required|exists:md_departments,code',
-            'name'            => 'required|string|max:100',
-            'status'          => 'required|in:active,inactive',
+            'name' => 'required|string|max:100',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $line = MdLine::create($validated);
@@ -84,8 +84,8 @@ class LineController extends Controller
     {
         $validated = $request->validate([
             'department_code' => 'required|exists:md_departments,code',
-            'name'            => 'required|string|max:100',
-            'status'          => 'required|in:active,inactive',
+            'name' => 'required|string|max:100',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $line->update($validated);
