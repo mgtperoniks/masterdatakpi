@@ -22,6 +22,8 @@ class User extends Authenticatable
         'password',
         'role',
         'scope',
+        'department_code',
+        'allowed_apps',
     ];
 
     /**
@@ -44,6 +46,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'allowed_apps' => 'array',
         ];
     }
 }

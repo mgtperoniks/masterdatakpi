@@ -85,10 +85,15 @@
                     <button class="text-white p-2 hover:bg-white/10 rounded-full transition-colors">
                         <span class="material-icons">notifications</span>
                     </button>
-                    {{-- User Profile / Logout --}}
-                    <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-                        <span class="material-icons text-white text-sm">person</span>
+                <div class="flex items-center gap-3 pl-3 border-l border-white/20">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-white text-xs font-bold leading-none">{{ Auth::user()->name }}</p>
+                        <p class="text-white/60 text-[10px] leading-tight mt-1">{{ Auth::user()->email }}</p>
                     </div>
+                    <div class="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center border border-white/10 shadow-inner">
+                        <span class="text-white text-xs font-black uppercase">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                    </div>
+                </div>
                 </div>
             </header>
 
