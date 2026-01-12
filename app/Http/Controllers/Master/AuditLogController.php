@@ -10,7 +10,8 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = MdAuditLog::query();
+        $this->authorizeAudit();
+        $query = MdAuditLog::with('user');
 
         if ($request->table_name) {
             $query->where('table_name', $request->table_name);
@@ -29,5 +30,13 @@ class AuditLogController extends Controller
         $tables = MdAuditLog::select('table_name')->distinct()->pluck('table_name');
 
         return view('master.audit_logs.index', compact('logs', 'tables'));
+    }
+
+    protected function authorizeAudit()
+    {
+        $user = auth()->user();
+        if (!in_array($user->role, ['direktur', 'mr'])) {
+            abort(403, 'Unauthorized action.');
+        }
     }
 }

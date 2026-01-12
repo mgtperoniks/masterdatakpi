@@ -31,9 +31,12 @@ class UserController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'department_code' => ['nullable', 'string', 'exists:md_departments,code'],
+            'tim' => ['nullable', 'string', 'max:50'],
+            'additional_department_codes' => ['nullable', 'array'],
+            'additional_department_codes.*' => ['string', 'exists:md_departments,code'],
             'role' => ['required', 'string'],
             'allowed_apps' => ['nullable', 'array'],
         ]);
@@ -43,6 +46,8 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'department_code' => $request->department_code,
+            'tim' => $request->tim,
+            'additional_department_codes' => $request->additional_department_codes ?? [],
             'role' => $request->role,
             'allowed_apps' => $request->allowed_apps ?? [],
         ]);
@@ -64,8 +69,11 @@ class UserController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'department_code' => ['nullable', 'string', 'exists:md_departments,code'],
+            'tim' => ['nullable', 'string', 'max:50'],
+            'additional_department_codes' => ['nullable', 'array'],
+            'additional_department_codes.*' => ['string', 'exists:md_departments,code'],
             'role' => ['required', 'string'],
             'allowed_apps' => ['nullable', 'array'],
         ]);
@@ -74,6 +82,8 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'department_code' => $request->department_code,
+            'tim' => $request->tim,
+            'additional_department_codes' => $request->additional_department_codes ?? [],
             'role' => $request->role,
             'allowed_apps' => $request->allowed_apps ?? [],
         ];

@@ -67,14 +67,17 @@ class OperatorController extends Controller
      */
     public function store(Request $request)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menambah data.');
+        }
         $validated = $request->validate([
-            'code'             => 'required|string|max:30',
-            'name'             => 'required|string|max:150',
-            'department_code'  => 'required|exists:md_departments,code',
-            'position'         => 'required|string|max:100',
-            'gender'           => 'nullable|in:male,female',
-            'employment_type'  => 'required|in:PKWT,PKWTT,OUTSOURCE',
-            'join_date'        => 'required|date',
+            'code' => 'required|string|max:30',
+            'name' => 'required|string|max:150',
+            'department_code' => 'required|exists:md_departments,code',
+            'position' => 'required|string|max:100',
+            'gender' => 'nullable|in:male,female',
+            'employment_type' => 'required|in:PKWT,PKWTT,OUTSOURCE',
+            'join_date' => 'required|date',
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -95,8 +98,8 @@ class OperatorController extends Controller
             MdOperator::create([
                 ...$validated,
                 'employment_seq' => $nextSeq,
-                'status'         => 'active',
-                'active_from'    => $validated['join_date'],
+                'status' => 'active',
+                'active_from' => $validated['join_date'],
             ]);
         });
 
@@ -125,14 +128,17 @@ class OperatorController extends Controller
      */
     public function update(Request $request, MdOperator $operator)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengubah data.');
+        }
         $validated = $request->validate([
-            'name'             => 'required|string|max:150',
-            'department_code'  => 'required|exists:md_departments,code',
-            'position'         => 'required|string|max:100',
-            'gender'           => 'nullable|in:male,female',
-            'employment_type'  => 'required|in:PKWT,PKWTT,OUTSOURCE',
-            'join_date'        => 'required|date',
-            'status'           => 'required|in:active,inactive',
+            'name' => 'required|string|max:150',
+            'department_code' => 'required|exists:md_departments,code',
+            'position' => 'required|string|max:100',
+            'gender' => 'nullable|in:male,female',
+            'employment_type' => 'required|in:PKWT,PKWTT,OUTSOURCE',
+            'join_date' => 'required|date',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $operator->update($validated);
@@ -147,8 +153,11 @@ class OperatorController extends Controller
      */
     public function confirmDeactivate(Request $request, MdOperator $operator)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menonaktifkan data.');
+        }
         $request->validate([
-            'inactive_at'     => 'required|date',
+            'inactive_at' => 'required|date',
             'inactive_reason' => 'required|string|min:5',
         ]);
 
@@ -157,10 +166,10 @@ class OperatorController extends Controller
         }
 
         $operator->update([
-            'status'          => 'inactive',
-            'inactive_at'     => $request->inactive_at,
+            'status' => 'inactive',
+            'inactive_at' => $request->inactive_at,
             'inactive_reason' => $request->inactive_reason,
-            'active_until'    => $request->inactive_at,
+            'active_until' => $request->inactive_at,
         ]);
 
         return redirect()
@@ -173,6 +182,9 @@ class OperatorController extends Controller
      */
     public function activate(int $id)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengaktifkan data.');
+        }
         DB::transaction(function () use ($id) {
 
             $old = MdOperator::findOrFail($id);
@@ -193,16 +205,16 @@ class OperatorController extends Controller
                 ->max('employment_seq') + 1;
 
             MdOperator::create([
-                'code'             => $old->code,
-                'name'             => $old->name,
-                'department_code'  => $old->department_code,
-                'position'         => $old->position,
-                'gender'           => $old->gender,
-                'employment_type'  => $old->employment_type,
-                'join_date'        => $old->join_date,
-                'employment_seq'   => $nextSeq,
-                'status'           => 'active',
-                'active_from'      => now()->toDateString(),
+                'code' => $old->code,
+                'name' => $old->name,
+                'department_code' => $old->department_code,
+                'position' => $old->position,
+                'gender' => $old->gender,
+                'employment_type' => $old->employment_type,
+                'join_date' => $old->join_date,
+                'employment_seq' => $nextSeq,
+                'status' => 'active',
+                'active_from' => now()->toDateString(),
             ]);
         });
 

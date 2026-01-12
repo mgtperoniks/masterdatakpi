@@ -69,7 +69,7 @@
             </div>
 
             <div class="space-y-2">
-                <label class="text-xs font-bold uppercase tracking-widest text-slate-500">Department Lock</label>
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500">Primary Department</label>
                 <select name="department_code" class="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 focus:ring-primary focus:border-primary">
                     <option value="">GLOBALLY ACCESSIBLE (No restriction)</option>
                     @foreach($departments as $dept)
@@ -78,7 +78,33 @@
                         </option>
                     @endforeach
                 </select>
-                <p class="text-[10px] text-slate-400 px-2 italic">If selected, user ONLY sees data from this department.</p>
+                <p class="text-[10px] text-slate-400 px-2 italic">Main department assignment.</p>
+            </div>
+
+            <div class="space-y-2 md:col-span-2">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500">Additional Department Access (For Managers)</label>
+                <div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 max-h-48 overflow-y-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        @foreach($departments as $dept)
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" name="additional_department_codes[]" value="{{ $dept->code }}" 
+                                       class="rounded border-slate-300 text-primary focus:ring-primary"
+                                       {{ is_array(old('additional_department_codes')) && in_array($dept->code, old('additional_department_codes')) ? 'checked' : '' }}>
+                                <span class="text-xs font-medium text-slate-600 group-hover:text-primary transition-colors">
+                                    {{ $dept->code }} - {{ $dept->name }}
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-400 px-2 italic">Select multiple departments if this user manages more than one area.</p>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs font-bold uppercase tracking-widest text-slate-500">Team (TIM)</label>
+                <input type="text" name="tim" value="{{ old('tim') }}" placeholder="e.g. TIM A"
+                       class="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 focus:ring-primary focus:border-primary transition-all">
+                <p class="text-[10px] text-slate-400 px-2 italic">For SPV role: TIM A, TIM B, or TIM C.</p>
             </div>
 
             <div class="space-y-2">

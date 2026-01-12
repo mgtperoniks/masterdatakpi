@@ -64,15 +64,18 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menambah data.');
+        }
         $validated = $request->validate([
-            'code'            => 'required|string|max:50|unique:md_items,code',
-            'name'            => 'required|string|max:150',
-            'aisi'            => 'nullable|string|max:50',
-            'standard'        => 'nullable|string|max:20',
-            'unit_weight'     => 'nullable|numeric|min:0',
+            'code' => 'required|string|max:50|unique:md_items,code',
+            'name' => 'required|string|max:150',
+            'aisi' => 'nullable|string|max:50',
+            'standard' => 'nullable|string|max:20',
+            'unit_weight' => 'nullable|numeric|min:0',
             'department_code' => 'required|exists:md_departments,code',
-            'cycle_time_sec'  => 'required|integer|min:1',
-            'status'          => 'required|in:active,inactive',
+            'cycle_time_sec' => 'required|integer|min:1',
+            'status' => 'required|in:active,inactive',
         ]);
 
         MdItem::create($validated);
@@ -99,15 +102,18 @@ class ItemController extends Controller
      */
     public function update(Request $request, MdItem $item)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengubah data.');
+        }
         $validated = $request->validate([
-            'code'            => 'required|string|max:50|unique:md_items,code,' . $item->id,
-            'name'            => 'required|string|max:150',
-            'aisi'            => 'nullable|string|max:50',
-            'standard'        => 'nullable|string|max:20',
-            'unit_weight'     => 'nullable|numeric|min:0',
+            'code' => 'required|string|max:50|unique:md_items,code,' . $item->id,
+            'name' => 'required|string|max:150',
+            'aisi' => 'nullable|string|max:50',
+            'standard' => 'nullable|string|max:20',
+            'unit_weight' => 'nullable|numeric|min:0',
             'department_code' => 'required|exists:md_departments,code',
-            'cycle_time_sec'  => 'required|integer|min:1',
-            'status'          => 'required|in:active,inactive',
+            'cycle_time_sec' => 'required|integer|min:1',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $item->update($validated);
@@ -122,6 +128,9 @@ class ItemController extends Controller
      */
     public function deactivate(MdItem $item)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menonaktifkan data.');
+        }
         $item->update([
             'status' => 'inactive',
         ]);
@@ -134,6 +143,9 @@ class ItemController extends Controller
      */
     public function activate(MdItem $item)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengaktifkan data.');
+        }
         $item->update([
             'status' => 'active',
         ]);

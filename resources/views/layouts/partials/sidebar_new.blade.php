@@ -56,12 +56,18 @@
             <span class="font-medium">Heat Numbers</span>
         </a>
 
-        @if(in_array(Auth::user()->department_code, ['100', '100.1']))
-        <a href="{{ route('master.users.index') }}"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('master.users.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/5 hover:text-white' }}">
-            <span class="material-icons">manage_accounts</span>
-            <span class="font-medium">User Management</span>
-        </a>
+        @if(in_array(Auth::user()->role, ['direktur', 'mr']))
+            <a href="{{ route('master.users.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('master.users.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/5 hover:text-white' }}">
+                <span class="material-icons">manage_accounts</span>
+                <span class="font-medium">User Management</span>
+            </a>
+
+            <a href="{{ route('master.audit-logs.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('master.audit-logs.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/5 hover:text-white' }}">
+                <span class="material-icons">history</span>
+                <span class="font-medium">Audit Logs</span>
+            </a>
         @endif
 
         <div class="pt-10">

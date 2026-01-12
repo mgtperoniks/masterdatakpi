@@ -54,9 +54,12 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menambah data.');
+        }
         $validated = $request->validate([
-            'code'   => 'required|string|max:20|unique:md_departments,code',
-            'name'   => 'required|string|max:100',
+            'code' => 'required|string|max:20|unique:md_departments,code',
+            'name' => 'required|string|max:100',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -88,8 +91,11 @@ class DepartmentController extends Controller
      */
     public function update(Request $request, MdDepartment $department)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengubah data.');
+        }
         $validated = $request->validate([
-            'name'   => 'required|string|max:100',
+            'name' => 'required|string|max:100',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -113,6 +119,9 @@ class DepartmentController extends Controller
      */
     public function deactivate(MdDepartment $department)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menonaktifkan data.');
+        }
         $department->update([
             'status' => 'inactive',
         ]);
@@ -133,6 +142,9 @@ class DepartmentController extends Controller
      */
     public function activate(MdDepartment $department)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengaktifkan data.');
+        }
         $department->update([
             'status' => 'active',
         ]);

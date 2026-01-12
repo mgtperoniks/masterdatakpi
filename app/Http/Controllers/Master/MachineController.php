@@ -75,12 +75,15 @@ class MachineController extends Controller
      */
     public function store(Request $request)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menambah data.');
+        }
         $validated = $request->validate([
-            'code'            => 'required|string|max:50|unique:md_machines,code',
-            'name'            => 'required|string|max:150',
+            'code' => 'required|string|max:50|unique:md_machines,code',
+            'name' => 'required|string|max:150',
             'department_code' => 'required|exists:md_departments,code',
-            'line_code'       => 'nullable|exists:md_lines,code',
-            'status'          => 'required|in:active,inactive',
+            'line_code' => 'nullable|exists:md_lines,code',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $machine = MdMachine::create($validated);
@@ -122,12 +125,15 @@ class MachineController extends Controller
      */
     public function update(Request $request, MdMachine $machine)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengubah data.');
+        }
         $validated = $request->validate([
-            'code'            => 'required|string|max:50|unique:md_machines,code,' . $machine->id,
-            'name'            => 'required|string|max:150',
+            'code' => 'required|string|max:50|unique:md_machines,code,' . $machine->id,
+            'name' => 'required|string|max:150',
             'department_code' => 'required|exists:md_departments,code',
-            'line_code'       => 'nullable|exists:md_lines,code',
-            'status'          => 'required|in:active,inactive',
+            'line_code' => 'nullable|exists:md_lines,code',
+            'status' => 'required|in:active,inactive',
         ]);
 
         $machine->update($validated);
@@ -150,6 +156,9 @@ class MachineController extends Controller
      */
     public function deactivate(MdMachine $machine)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan menonaktifkan data.');
+        }
         $machine->update([
             'status' => 'inactive',
         ]);
@@ -170,6 +179,9 @@ class MachineController extends Controller
      */
     public function activate(MdMachine $machine)
     {
+        if (auth()->user()->isReadOnly()) {
+            return back()->with('error', 'Mode Read-Only: Tidak diizinkan mengaktifkan data.');
+        }
         $machine->update([
             'status' => 'active',
         ]);
