@@ -10,11 +10,19 @@ class MdHeatNumber extends Model
 
     protected $fillable = [
         'kode_produksi',
+        'heat_date',
         'item_code',
         'item_name',
         'heat_number',
         'cor_qty',
+        'size',
+        'customer',
+        'line',
         'status',
+    ];
+
+    protected $casts = [
+        'heat_date' => 'date',
     ];
 
     /**

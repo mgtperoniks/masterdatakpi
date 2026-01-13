@@ -6,15 +6,44 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MdHeatNumber;
 use App\Models\MdItem;
+use Illuminate\Support\Facades\DB;
 
 class MdHeatNumberController extends Controller
 {
     /**
-     * Display a listing of the heat numbers.
+     * Display a listing of daily batches (grouped by heat_date).
      */
     public function index(Request $request)
     {
-        $query = MdHeatNumber::query();
+        $query = MdHeatNumber::query()
+            ->select(
+                'heat_date',
+                DB::raw('COUNT(*) as total_records'),
+                DB::raw('SUM(cor_qty) as total_cor_qty')
+            )
+            ->whereNotNull('heat_date')
+            ->groupBy('heat_date')
+            ->orderBy('heat_date', 'desc');
+
+        if ($request->filled('month')) {
+            $query->whereMonth('heat_date', $request->month);
+        }
+
+        if ($request->filled('year')) {
+            $query->whereYear('heat_date', $request->year);
+        }
+
+        $dailyBatches = $query->paginate(20)->withQueryString();
+
+        return view('master.heat_numbers.index', compact('dailyBatches'));
+    }
+
+    /**
+     * Show the details of a specific day's heat numbers.
+     */
+    public function dailyDetails(Request $request, $date)
+    {
+        $query = MdHeatNumber::whereDate('heat_date', $date);
 
         if ($request->filled('q')) {
             $q = $request->q;
@@ -29,12 +58,10 @@ class MdHeatNumberController extends Controller
             $query->where('status', $request->status);
         }
 
-        $heatNumbers = $query
-            ->orderBy('created_at', 'desc')
-            ->paginate(20)
-            ->withQueryString();
+        $heatNumbers = $query->orderBy('created_at', 'desc')->paginate(50)->withQueryString();
+        $heatDate = \Carbon\Carbon::parse($date);
 
-        return view('master.heat_numbers.index', compact('heatNumbers'));
+        return view('master.heat_numbers.daily_details', compact('heatNumbers', 'heatDate'));
     }
 
     /**
@@ -53,6 +80,7 @@ class MdHeatNumberController extends Controller
     {
         $validated = $request->validate([
             'kode_produksi' => 'nullable|string|max:50',
+            'heat_date' => 'nullable|date',
             'item_code' => 'required|string|exists:md_items,code',
             'heat_number' => 'required|string|max:50|unique:md_heat_numbers,heat_number',
             'cor_qty' => 'required|integer|min:0',
@@ -62,6 +90,7 @@ class MdHeatNumberController extends Controller
         // Auto-fetch item name for denormalization
         $item = MdItem::where('code', $validated['item_code'])->first();
         $validated['item_name'] = $item->name;
+        $validated['heat_date'] = $validated['heat_date'] ?? now()->toDateString();
 
         MdHeatNumber::create($validated);
 
@@ -86,6 +115,7 @@ class MdHeatNumberController extends Controller
     {
         $validated = $request->validate([
             'kode_produksi' => 'nullable|string|max:50',
+            'heat_date' => 'nullable|date',
             'item_code' => 'required|string|exists:md_items,code',
             'heat_number' => 'required|string|max:50|unique:md_heat_numbers,heat_number,' . $heatNumber->id,
             'cor_qty' => 'required|integer|min:0',
@@ -136,9 +166,11 @@ class MdHeatNumberController extends Controller
     public function bulkStore(Request $request)
     {
         $request->validate([
+            'heat_date' => 'required|date',
             'data' => 'required|array',
         ]);
 
+        $heatDate = $request->input('heat_date');
         $rows = $request->input('data');
         $successCount = 0;
         $errors = [];
@@ -149,6 +181,9 @@ class MdHeatNumberController extends Controller
             $item_code = trim($row['item_code'] ?? '');
             $cor_qty = $row['cor_qty'] ?? 0;
             $kode_prod = trim($row['kode_produksi'] ?? '');
+            $size = trim($row['size'] ?? '');
+            $customer = trim($row['customer'] ?? '');
+            $line = trim($row['line'] ?? '');
 
             if (empty($heat_number) || empty($item_code)) {
                 // Skip empty rows if any
@@ -169,10 +204,14 @@ class MdHeatNumberController extends Controller
                 MdHeatNumber::updateOrCreate(
                     ['heat_number' => $heat_number],
                     [
+                        'heat_date' => $heatDate,
                         'item_code' => $item->code,
                         'item_name' => $item->name,
                         'cor_qty' => (int) $cor_qty,
                         'kode_produksi' => $kode_prod,
+                        'size' => $size ?: null,
+                        'customer' => $customer ?: null,
+                        'line' => $line ?: null,
                         'status' => 'active',
                     ]
                 );

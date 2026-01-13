@@ -76,6 +76,16 @@
             </div>
         </div>
 
+        {{-- Heat Date Picker --}}
+        <div class="mb-6">
+            <label for="heatDateInput" class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                <span class="material-icons text-sm align-text-top mr-1">event</span>
+                Tanggal Cor (Heat Date) <span class="text-rose-500">*</span>
+            </label>
+            <input type="date" id="heatDateInput" required value="{{ now()->toDateString() }}"
+                class="w-full md:w-64 pl-4 pr-4 py-3 bg-white dark:bg-slate-800 border-none rounded-2xl shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary transition-all text-sm outline-none">
+        </div>
+
         {{-- Grid Container --}}
         <div
             class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden mb-6">
@@ -106,22 +116,26 @@
         const container = document.getElementById('grid-container');
         const saveBtn = document.getElementById('saveBtn');
 
-        // Initial 30 Empty Rows
-        const data = Array.from({ length: 30 }, () => ['', '', '', '']);
+        // Initial 30 Empty Rows (7 columns now)
+        const data = Array.from({ length: 30 }, () => ['', '', '', '', '', '', '']);
 
         const hot = new Handsontable(container, {
             data: data,
             rowHeaders: true,
-            colHeaders: ['HEAT NUMBER', 'ITEM CODE', 'COR QTY', 'KODE PRODUKSI'],
+            colHeaders: ['HEAT NUMBER', 'ITEM CODE', 'COR QTY', 'KODE PROD', 'SIZE', 'CUSTOMER', 'LINE'],
             height: '100%',
             width: '100%',
             licenseKey: 'non-commercial-and-evaluation',
-            stretchH: 'all',
+            stretchH: 'last',
+            colWidths: [120, 200, 60, 80, 70, 100, 80],
             columns: [
-                { data: 0, placeholder: 'e.g. HN-2024-X' }, // Heat Number
-                { data: 1, placeholder: 'e.g. 1.002.3' }, // Item Code
-                { data: 2, type: 'numeric' }, // Cor Qty
-                { data: 3 }, // Kode Produksi
+                { data: 0, placeholder: 'HN-2024-X' },      // Heat Number (10-12 chars)
+                { data: 1, placeholder: '1.002.3' },        // Item Code (20-30 chars)
+                { data: 2, type: 'numeric' },               // Cor Qty (1-3 chars)
+                { data: 3, placeholder: 'C01' },            // Kode Produksi (3-5 chars)
+                { data: 4, placeholder: '1/2"' },           // Size (3-6 chars)
+                { data: 5, placeholder: 'ABC' },            // Customer (3-10 chars)
+                { data: 6, placeholder: 'L-001' },          // Line (5-8 chars, optional)
             ],
             contextMenu: true,
             autoWrapRow: true,
@@ -140,7 +154,10 @@
                         heat_number: row[0],
                         item_code: row[1],
                         cor_qty: row[2],
-                        kode_produksi: row[3]
+                        kode_produksi: row[3],
+                        size: row[4],
+                        customer: row[5],
+                        line: row[6]
                     });
                 }
             });
@@ -150,6 +167,17 @@
                     icon: 'info',
                     title: 'No Data Found',
                     text: 'Please paste or enter valid data into the grid first.',
+                    confirmButtonColor: '#2563EB'
+                });
+                return;
+            }
+
+            const heatDate = document.getElementById('heatDateInput').value;
+            if (!heatDate) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Heat Date Required',
+                    text: 'Please select a Heat Date (Tanggal Cor) before saving.',
                     confirmButtonColor: '#2563EB'
                 });
                 return;
@@ -165,7 +193,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ data: payload })
+                    body: JSON.stringify({ heat_date: heatDate, data: payload })
                 });
 
                 const result = await response.json();

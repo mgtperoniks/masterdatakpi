@@ -165,6 +165,7 @@ Route::middleware(['auth'])->group(function () {
         */
         Route::controller(MdHeatNumberController::class)->prefix('heat-numbers')->name('heat-numbers.')->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/date/{date}', 'dailyDetails')->name('daily-details');
             Route::get('/import', 'import')->name('import');
             Route::post('/bulk-store', 'bulkStore')->name('bulk-store');
             Route::get('/create', 'create')->name('create');

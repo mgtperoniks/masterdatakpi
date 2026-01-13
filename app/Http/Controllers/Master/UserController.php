@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         $this->authorizeAdmin();
-        $users = User::latest()->get();
+        $users = User::orderBy('name', 'asc')->get();
         return view('master.users.index', compact('users'));
     }
 

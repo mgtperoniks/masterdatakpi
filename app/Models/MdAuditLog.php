@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 
 class MdAuditLog extends Model
 {
+    use MassPrunable;
+
     protected $table = 'md_audit_logs';
 
     public $timestamps = false;
@@ -29,6 +32,14 @@ class MdAuditLog extends Model
         'new_values' => 'array',
         'created_at' => 'datetime',
     ];
+
+    /**
+     * Get the prunable model query.
+     */
+    public function prunable()
+    {
+        return static::where('created_at', '<=', now()->subYear());
+    }
 
     public function user()
     {
