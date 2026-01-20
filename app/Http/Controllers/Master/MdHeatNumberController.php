@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\MdHeatNumber;
 use App\Models\MdItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class MdHeatNumberController extends Controller
 {
@@ -82,7 +83,14 @@ class MdHeatNumberController extends Controller
             'kode_produksi' => 'nullable|string|max:50',
             'heat_date' => 'nullable|date',
             'item_code' => 'required|string|exists:md_items,code',
-            'heat_number' => 'required|string|max:50|unique:md_heat_numbers,heat_number',
+            'heat_number' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('md_heat_numbers')->where(function ($query) use ($request) {
+                    return $query->where('item_code', $request->item_code);
+                }),
+            ],
             'cor_qty' => 'required|integer|min:0',
             'status' => 'required|in:active,inactive',
         ]);
@@ -117,7 +125,14 @@ class MdHeatNumberController extends Controller
             'kode_produksi' => 'nullable|string|max:50',
             'heat_date' => 'nullable|date',
             'item_code' => 'required|string|exists:md_items,code',
-            'heat_number' => 'required|string|max:50|unique:md_heat_numbers,heat_number,' . $heatNumber->id,
+            'heat_number' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('md_heat_numbers')->ignore($heatNumber->id)->where(function ($query) use ($request) {
+                    return $query->where('item_code', $request->item_code);
+                }),
+            ],
             'cor_qty' => 'required|integer|min:0',
             'status' => 'required|in:active,inactive',
         ]);
@@ -200,21 +215,30 @@ class MdHeatNumberController extends Controller
                 continue;
             }
 
+            // Check for existing Heat Number + Item combination (GLOBAL UNIQUENESS)
+            $exists = MdHeatNumber::where('heat_number', $heat_number)
+                ->where('item_code', $item->code) // Use $item->code normalized
+                ->exists();
+
+            if ($exists) {
+                // REJECT DUPLICATES
+                $errors[] = "Baris " . ($index + 1) . ": Heat Number '{$heat_number}' dengan Item '{$item_code}' sudah ada di database (Duplicate).";
+                continue;
+            }
+
             try {
-                MdHeatNumber::updateOrCreate(
-                    ['heat_number' => $heat_number],
-                    [
-                        'heat_date' => $heatDate,
-                        'item_code' => $item->code,
-                        'item_name' => $item->name,
-                        'cor_qty' => (int) $cor_qty,
-                        'kode_produksi' => $kode_prod,
-                        'size' => $size ?: null,
-                        'customer' => $customer ?: null,
-                        'line' => $line ?: null,
-                        'status' => 'active',
-                    ]
-                );
+                MdHeatNumber::create([
+                    'heat_number' => $heat_number,
+                    'item_code' => $item->code,
+                    'heat_date' => $heatDate,
+                    'item_name' => $item->name,
+                    'cor_qty' => (int) $cor_qty,
+                    'kode_produksi' => $kode_prod,
+                    'size' => $size ?: null,
+                    'customer' => $customer ?: null,
+                    'line' => $line ?: null,
+                    'status' => 'active',
+                ]);
                 $successCount++;
             } catch (\Exception $e) {
                 $errors[] = "Baris " . ($index + 1) . ": Error: " . $e->getMessage();

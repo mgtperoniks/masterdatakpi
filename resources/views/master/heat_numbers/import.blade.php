@@ -183,6 +183,24 @@
                 return;
             }
 
+            // Confirmation Dialog for Date
+            const confirmDate = await Swal.fire({
+                icon: 'question',
+                title: 'Konfirmasi Tanggal Cor',
+                text: `Apakah tanggal upload cor (${heatDate}) sudah sesuai dengan tanggal heat number?`,
+                position: 'top',
+                showCancelButton: true,
+                confirmButtonColor: '#2563EB',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Lanjutkan',
+                cancelButtonText: 'Periksa Lagi',
+                reverseButtons: true
+            });
+
+            if (!confirmDate.isConfirmed) {
+                return;
+            }
+
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<span class="material-icons text-lg animate-spin">sync</span> Saving...';
 

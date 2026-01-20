@@ -55,7 +55,8 @@
                                         <option value="">Select Item</option>
                                         @foreach($items as $item)
                                             <option value="{{ $item->code }}" @selected($item->code === $heatNumber->item_code)>
-                                                {{ $item->code }} - {{ $item->name }}</option>
+                                                {{ $item->code }} - {{ $item->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     <span
@@ -76,7 +77,17 @@
                                 Batch Details</h2>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">
+                                    <span class="material-icons text-[10px] align-text-top mr-1">event</span>
+                                    Heat Date
+                                </label>
+                                <input type="date" name="heat_date"
+                                    value="{{ old('heat_date', \Carbon\Carbon::parse($heatNumber->heat_date)->format('Y-m-d')) }}"
+                                    required
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-none rounded-2xl text-sm focus:ring-2 focus:ring-primary transition-all shadow-sm outline-none">
+                            </div>
                             <div>
                                 <label
                                     class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">Kode
