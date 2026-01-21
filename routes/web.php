@@ -33,7 +33,7 @@ Route::get('/', function () {
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'app_access'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------

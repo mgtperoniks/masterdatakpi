@@ -70,15 +70,6 @@
             </a>
         @endif
 
-        <div class="pt-10">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-all w-full text-left">
-                    <span class="material-icons">logout</span>
-                    <span class="font-medium">Sign Out</span>
-                </button>
-            </form>
-        </div>
+
     </nav>
 </div>

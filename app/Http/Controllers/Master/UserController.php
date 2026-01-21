@@ -104,7 +104,7 @@ class UserController extends Controller
     protected function authorizeAdmin()
     {
         $user = auth()->user();
-        if (!in_array($user->department_code, ['100', '100.1'])) {
+        if (!in_array($user->role, ['direktur', 'mr']) && !in_array($user->department_code, ['100', '100.1'])) {
             abort(403, 'Unauthorized action.');
         }
     }

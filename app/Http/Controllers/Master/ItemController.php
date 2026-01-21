@@ -27,8 +27,12 @@ class ItemController extends Controller
             });
         }
 
-        // 🏭 Filter Department
-        if ($request->filled('department_code')) {
+        // 🔒 Scoping: Admin Dept only sees their own department
+        $user = auth()->user();
+        if (!in_array($user->role, ['manager', 'direktur', 'mr'])) {
+            $query->where('department_code', $user->department_code);
+        } elseif ($request->filled('department_code')) {
+            // Global roles can filter manually
             $query->where('department_code', $request->department_code);
         }
 

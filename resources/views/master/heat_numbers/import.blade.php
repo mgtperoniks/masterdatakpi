@@ -4,7 +4,7 @@
 @section('header_title', 'Excel Import Data')
 
 @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css">
+    {{-- Local styles loaded via app.js --}}
     <style>
         .handsontable {
             font-family: 'Inter', sans-serif !important;
@@ -109,154 +109,175 @@
 @endsection
 
 @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    {{-- Local scripts loaded via app.js --}}
     <script>
-        const container = document.getElementById('grid-container');
-        const saveBtn = document.getElementById('saveBtn');
+        document.addEventListener('DOMContentLoaded', () => {
+            const initHandsontable = () => {
+                if (typeof Handsontable === 'undefined') {
+                    // Script not loaded yet, retry in 50ms
+                    setTimeout(initHandsontable, 50);
+                    return;
+                }
 
-        // Initial 30 Empty Rows (7 columns now)
-        const data = Array.from({ length: 30 }, () => ['', '', '', '', '', '', '']);
+                const container = document.getElementById('grid-container');
+                const saveBtn = document.getElementById('saveBtn');
 
-        const hot = new Handsontable(container, {
-            data: data,
-            rowHeaders: true,
-            colHeaders: ['HEAT NUMBER', 'ITEM CODE', 'COR QTY', 'KODE PROD', 'SIZE', 'CUSTOMER', 'LINE'],
-            height: '100%',
-            width: '100%',
-            licenseKey: 'non-commercial-and-evaluation',
-            stretchH: 'last',
-            colWidths: [120, 200, 60, 80, 70, 100, 80],
-            columns: [
-                { data: 0, placeholder: 'HN-2024-X' },      // Heat Number (10-12 chars)
-                { data: 1, placeholder: '1.002.3' },        // Item Code (20-30 chars)
-                { data: 2, type: 'numeric' },               // Cor Qty (1-3 chars)
-                { data: 3, placeholder: 'C01' },            // Kode Produksi (3-5 chars)
-                { data: 4, placeholder: '1/2"' },           // Size (3-6 chars)
-                { data: 5, placeholder: 'ABC' },            // Customer (3-10 chars)
-                { data: 6, placeholder: 'L-001' },          // Line (5-8 chars, optional)
-            ],
-            contextMenu: true,
-            autoWrapRow: true,
-            autoWrapCol: true,
-            minSpareRows: 5,
+                // Initial 30 Empty Rows (7 columns now)
+                const data = Array.from({ length: 30 }, () => ['', '', '', '', '', '', '']);
+
+                const hot = new Handsontable(container, {
+                    data: data,
+                    rowHeaders: true,
+                    colHeaders: ['HEAT NUMBER', 'ITEM CODE', 'COR QTY', 'KODE PROD', 'SIZE', 'CUSTOMER', 'LINE'],
+                    height: '100%',
+                    width: '100%',
+                    licenseKey: 'non-commercial-and-evaluation',
+                    stretchH: 'last',
+                    colWidths: [120, 200, 60, 80, 70, 100, 80],
+                    columns: [
+                        { data: 0, placeholder: 'HN-2024-X' },      // Heat Number (10-12 chars)
+                        { data: 1, placeholder: '1.002.3' },        // Item Code (20-30 chars)
+                        { data: 2, type: 'numeric' },               // Cor Qty (1-3 chars)
+                        { data: 3, placeholder: 'C01' },            // Kode Produksi (3-5 chars)
+                        { data: 4, placeholder: '1/2"' },           // Size (3-6 chars)
+                        { data: 5, placeholder: 'ABC' },            // Customer (3-10 chars)
+                        { data: 6, placeholder: 'L-001' },          // Line (5-8 chars, optional)
+                    ],
+                    contextMenu: true,
+                    autoWrapRow: true,
+                    autoWrapCol: true,
+                    minSpareRows: 5,
+                });
+
+                // Attach Save Event
+                saveBtn.addEventListener('click', async () => {
+                    handleSave(hot);
+                });
+            };
+
+            initHandsontable();
         });
 
-        saveBtn.addEventListener('click', async () => {
+        // Extracted Save Function for clarity
+        async function handleSave(hot) {
             const tableData = hot.getData();
+            // ... rest of logic ...
             const payload = [];
 
-            // Clean and prepare data
-            tableData.forEach(row => {
-                if (row[0] && row[1]) { // If Heat Number and Item Code are not empty
-                    payload.push({
-                        heat_number: row[0],
-                        item_code: row[1],
-                        cor_qty: row[2],
-                        kode_produksi: row[3],
-                        size: row[4],
-                        customer: row[5],
-                        line: row[6]
-                    });
-                }
-            });
+            saveBtn.addEventListener('click', async () => {
+                const tableData = hot.getData();
+                const payload = [];
 
-            if (payload.length === 0) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'No Data Found',
-                    text: 'Please paste or enter valid data into the grid first.',
-                    confirmButtonColor: '#2563EB'
-                });
-                return;
-            }
-
-            const heatDate = document.getElementById('heatDateInput').value;
-            if (!heatDate) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Heat Date Required',
-                    text: 'Please select a Heat Date (Tanggal Cor) before saving.',
-                    confirmButtonColor: '#2563EB'
-                });
-                return;
-            }
-
-            // Confirmation Dialog for Date
-            const confirmDate = await Swal.fire({
-                icon: 'question',
-                title: 'Konfirmasi Tanggal Cor',
-                text: `Apakah tanggal upload cor (${heatDate}) sudah sesuai dengan tanggal heat number?`,
-                position: 'top',
-                showCancelButton: true,
-                confirmButtonColor: '#2563EB',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Lanjutkan',
-                cancelButtonText: 'Periksa Lagi',
-                reverseButtons: true
-            });
-
-            if (!confirmDate.isConfirmed) {
-                return;
-            }
-
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<span class="material-icons text-lg animate-spin">sync</span> Saving...';
-
-            try {
-                const response = await fetch('{{ route("master.heat-numbers.bulk-store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ heat_date: heatDate, data: payload })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    if (result.errors && result.errors.length > 0) {
-                        // Partly Success
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Partial Import',
-                            text: result.message + ' some rows had issues.',
-                            confirmButtonColor: '#2563EB'
-                        });
-
-                        document.getElementById('errorLog').style.display = 'block';
-                        const errorList = document.getElementById('errorList');
-                        errorList.innerHTML = '';
-                        result.errors.forEach(err => {
-                            const li = document.createElement('li');
-                            li.textContent = err;
-                            errorList.appendChild(li);
-                        });
-                    } else {
-                        // All Success
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Import Successful',
-                            text: result.message,
-                            confirmButtonColor: '#2563EB'
-                        }).then(() => {
-                            window.location.href = '{{ route("master.heat-numbers.index") }}';
+                // Clean and prepare data
+                tableData.forEach(row => {
+                    if (row[0] && row[1]) { // If Heat Number and Item Code are not empty
+                        payload.push({
+                            heat_number: row[0],
+                            item_code: row[1],
+                            cor_qty: row[2],
+                            kode_produksi: row[3],
+                            size: row[4],
+                            customer: row[5],
+                            line: row[6]
                         });
                     }
-                }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'System Error',
-                    text: 'Unable to process import at this time.',
-                    confirmButtonColor: '#2563EB'
                 });
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<span class="material-icons text-lg">cloud_upload</span> Save Records';
-            }
-        });
+
+                if (payload.length === 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Data Found',
+                        text: 'Please paste or enter valid data into the grid first.',
+                        confirmButtonColor: '#2563EB'
+                    });
+                    return;
+                }
+
+                const heatDate = document.getElementById('heatDateInput').value;
+                if (!heatDate) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Heat Date Required',
+                        text: 'Please select a Heat Date (Tanggal Cor) before saving.',
+                        confirmButtonColor: '#2563EB'
+                    });
+                    return;
+                }
+
+                // Confirmation Dialog for Date
+                const confirmDate = await Swal.fire({
+                    icon: 'question',
+                    title: 'Konfirmasi Tanggal Cor',
+                    text: `Apakah tanggal upload cor (${heatDate}) sudah sesuai dengan tanggal heat number?`,
+                    position: 'top',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2563EB',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Lanjutkan',
+                    cancelButtonText: 'Periksa Lagi',
+                    reverseButtons: true
+                });
+
+                if (!confirmDate.isConfirmed) {
+                    return;
+                }
+
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="material-icons text-lg animate-spin">sync</span> Saving...';
+
+                try {
+                    const response = await fetch('{{ route("master.heat-numbers.bulk-store") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ heat_date: heatDate, data: payload })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        if (result.errors && result.errors.length > 0) {
+                            // Partly Success
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Partial Import',
+                                text: result.message + ' some rows had issues.',
+                                confirmButtonColor: '#2563EB'
+                            });
+
+                            document.getElementById('errorLog').style.display = 'block';
+                            const errorList = document.getElementById('errorList');
+                            errorList.innerHTML = '';
+                            result.errors.forEach(err => {
+                                const li = document.createElement('li');
+                                li.textContent = err;
+                                errorList.appendChild(li);
+                            });
+                        } else {
+                            // All Success
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Import Successful',
+                                text: result.message,
+                                confirmButtonColor: '#2563EB'
+                            }).then(() => {
+                                window.location.href = '{{ route("master.heat-numbers.index") }}';
+                            });
+                        }
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'System Error',
+                        text: 'Unable to process import at this time.',
+                        confirmButtonColor: '#2563EB'
+                    });
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<span class="material-icons text-lg">cloud_upload</span> Save Records';
+                }
+            });
     </script>
 @endpush

@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'app_access' => \App\Http\Middleware\EnsureAppAccess::class,
+        ]);
     })
     ->withSchedule(function ($schedule) {
         $schedule->command('model:prune')->daily();

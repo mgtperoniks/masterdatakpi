@@ -6,46 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Master Data KPI')</title>
 
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    {{-- Fonts --}}
+    <style>
+        @font-face {
+            font-family: 'Material Icons Round';
+            font-style: normal;
+            font-weight: 400;
+            src: url("{{ asset('fonts/material-icons-round-latin-400-normal.woff2') }}") format('woff2'),
+                url("{{ asset('fonts/material-icons-round-latin-400-normal.woff') }}") format('woff');
+        }
 
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#2563EB",
-                        "background-light": "#F8FAFC",
-                        "background-dark": "#0F172A",
-                        "card-light": "#FFFFFF",
-                        "card-dark": "#111827",
-                        "active": "#22C55E",
-                        "inactive": "#F59E0B",
-                        "archived": "#64748B"
-                    },
-                    fontFamily: {
-                        display: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {
-                        DEFAULT: "12px",
-                    },
-                },
-            },
-        };
-    </script>
+        @font-face {
+            font-family: 'Material Icons';
+            font-style: normal;
+            font-weight: 400;
+            src: url("{{ asset('fonts/material-icons-round-latin-400-normal.woff2') }}") format('woff2');
+            /* Fallback to round */
+        }
+    </style>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        .ios-blur {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -54,6 +39,27 @@
 
         [x-cloak] {
             display: none !important;
+        }
+
+        /* Material Icons Classes Definition */
+        .material-icons,
+        .material-icons-round,
+        .material-icons-outlined {
+            font-family: 'Material Icons Round';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: 'liga';
         }
     </style>
     @stack('styles')
@@ -70,7 +76,7 @@
         {{-- Main Content --}}
         <div class="flex-1 flex flex-col">
             {{-- Top Header --}}
-            <header class="bg-primary px-5 py-4 flex items-center justify-between sticky top-0 z-50">
+            <header class="bg-primary px-5 py-4 flex items-center justify-between sticky top-0 z-50 shadow-md">
                 <div class="flex items-center gap-3">
                     <div class="bg-white/20 p-2 rounded-lg lg:hidden">
                         <span class="material-icons text-white">grid_view</span>
@@ -85,15 +91,25 @@
                     <button class="text-white p-2 hover:bg-white/10 rounded-full transition-colors">
                         <span class="material-icons">notifications</span>
                     </button>
-                <div class="flex items-center gap-3 pl-3 border-l border-white/20">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-white text-xs font-bold leading-none">{{ Auth::user()->name }}</p>
-                        <p class="text-white/60 text-[10px] leading-tight mt-1">{{ Auth::user()->email }}</p>
+                    <div class="flex items-center gap-3 pl-3 border-l border-white/20">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-white text-xs font-bold leading-none">{{ Auth::user()->name }}</p>
+                            <p class="text-white/60 text-[10px] leading-tight mt-1">{{ Auth::user()->email }}</p>
+                        </div>
+                        <div
+                            class="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center border border-white/10 shadow-inner">
+                            <span
+                                class="text-white text-xs font-black uppercase">{{ substr(Auth::user()->name, 0, 1) }}</span>
+                        </div>
+                        <form action="{{ route('logout') }}" method="POST" class="ml-1">
+                            @csrf
+                            <button type="submit"
+                                class="text-white/70 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors"
+                                title="Sign Out">
+                                <span class="material-icons text-[20px]">logout</span>
+                            </button>
+                        </form>
                     </div>
-                    <div class="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center border border-white/10 shadow-inner">
-                        <span class="text-white text-xs font-black uppercase">{{ substr(Auth::user()->name, 0, 1) }}</span>
-                    </div>
-                </div>
                 </div>
             </header>
 
@@ -105,7 +121,7 @@
 
     {{-- Bottom Nav (Mobile) --}}
     <nav
-        class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 safe-area-bottom px-6 py-3 flex justify-between items-center z-50">
+        class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 safe-area-bottom px-6 py-3 flex justify-between items-center z-50">
         <a href="{{ route('dashboard') }}"
             class="flex flex-col items-center gap-1 {{ request()->routeIs('dashboard') ? 'text-primary' : 'text-slate-400' }}">
             <span class="material-icons">dashboard</span>
@@ -133,9 +149,6 @@
         </a>
     </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     @stack('scripts')
 </body>
 

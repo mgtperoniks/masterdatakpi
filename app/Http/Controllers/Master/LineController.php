@@ -18,7 +18,15 @@ class LineController extends Controller
      */
     public function index()
     {
-        $lines = MdLine::with('department')
+        $query = MdLine::with('department');
+
+        // 🔒 Scoping: Admin Dept only sees their own department
+        $user = auth()->user();
+        if (!in_array($user->role, ['manager', 'direktur', 'mr'])) {
+            $query->where('department_code', $user->department_code);
+        }
+
+        $lines = $query
             ->orderBy('code')
             ->paginate(10);
 

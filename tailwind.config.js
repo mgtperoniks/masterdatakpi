@@ -12,10 +12,25 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ["Inter", "sans-serif"],
+            },
+            colors: {
+                primary: "#2563EB",
+                "background-light": "#F8FAFC",
+                "background-dark": "#0F172A",
+                "card-light": "#FFFFFF",
+                "card-dark": "#111827",
+                "active": "#22C55E",
+                "inactive": "#F59E0B",
+                "archived": "#64748B"
+            },
+            borderRadius: {
+                DEFAULT: "12px",
             },
         },
     },
+    darkMode: "class",
 
     plugins: [forms],
 };
