@@ -71,20 +71,30 @@ export function initializeHeatNumberImport() {
 
         const confirm = await Swal.fire({
             icon: 'question',
-            title: 'Confirm Date',
-            text: `Upload date: ${heatDate}. Proceed?`,
+            title: 'Konfirmasi Tanggal Cor',
+            text: `Apakah tanggal upload cor (${heatDate}) sudah sesuai dengan tanggal heat number?`,
+            position: 'top',
             showCancelButton: true,
-            confirmButtonText: 'Yes, Upload',
-            confirmButtonColor: '#2563EB'
+            confirmButtonColor: '#2563EB',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, Lanjutkan',
+            cancelButtonText: 'Periksa Lagi',
+            reverseButtons: true
         });
 
         if (!confirm.isConfirmed) return;
 
         // Get Configuration from Data Attributes
         const configDiv = document.getElementById('import-config');
+        if (!configDiv) {
+            console.error('Missing configuration div #import-config');
+            Swal.fire({ icon: 'error', title: 'Config Error', text: 'Page configuration missing.' });
+            return;
+        }
         const saveUrl = configDiv.dataset.saveUrl;
         const redirectUrl = configDiv.dataset.redirectUrl;
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
 
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="material-icons animate-spin">sync</span> Saving...';
@@ -94,10 +104,17 @@ export function initializeHeatNumberImport() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ heat_date: heatDate, data: payload })
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                // console.error('Server Error:', errorText); // Optional: keep or remove
+                throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+            }
 
             const result = await response.json();
 
@@ -122,7 +139,12 @@ export function initializeHeatNumberImport() {
             }
         } catch (error) {
             console.error(error);
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Import failed.', confirmButtonColor: '#2563EB' });
+            Swal.fire({
+                icon: 'error',
+                title: 'Import Error',
+                text: error.message || 'Import failed without specific error.',
+                confirmButtonColor: '#2563EB'
+            });
         } finally {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<span class="material-icons">cloud_upload</span> Save Records';
