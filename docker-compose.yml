@@ -1,0 +1,32 @@
+services:
+  app:
+    container_name: masterdatakpi-app
+    build: .
+    restart: always
+    ports:
+      - "6001:80"
+    env_file: .env
+    networks:
+      - kpinet
+
+  db:
+    container_name: masterdatakpi-db
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - kpinet
+
+volumes:
+  db_data:
+
+
+networks:
+  kpinet:
+    external: true
