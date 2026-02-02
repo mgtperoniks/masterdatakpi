@@ -15,14 +15,14 @@ class UserSeeder extends Seeder
                 'name' => 'Direktur',
                 'email' => 'direktur@peroniks.com',
                 'role' => 'direktur',
-                'department_code' => '100',
+                // 'department_code' => '100', // Temporarily disabled to fix FK violation
                 'allowed_apps' => ['masterdata-kpi', 'kpi-bubut'],
             ],
             [
                 'name' => 'MR',
                 'email' => 'mr@peroniks.com',
                 'role' => 'mr',
-                'department_code' => '100.1',
+                // 'department_code' => '100.1', // Temporarily disabled to fix FK violation
                 'allowed_apps' => ['masterdata-kpi', 'kpi-bubut'],
             ],
             [
