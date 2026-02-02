@@ -61,12 +61,22 @@ class UserSeeder extends Seeder
             // Ensure department exists if specified
             if (isset($u['department_code'])) {
                 $deptCode = (string) $u['department_code'];
-                $deptExists = \App\Models\MdDepartment::where('code', $deptCode)->exists();
 
-                // If department doesn't exist, set to NULL to prevent FK error
-                if (!$deptExists) {
-                    $this->command->warn("Department code $deptCode missing for user {$u['name']}. Setting to NULL.");
-                    $u['department_code'] = null;
+                // Try to find the department strictly
+                $dept = \App\Models\MdDepartment::where('code', $deptCode)->first();
+
+                if ($dept) {
+                    // Start clean: use the EXACT code from the DB to avoid case/collation issues
+                    $u['department_code'] = $dept->code;
+                } else {
+                    // Force Create if it doesn't exist
+                    $this->command->warn("Department code $deptCode missing. Force creating now.");
+                    $newDept = \App\Models\MdDepartment::create([
+                        'code' => $deptCode,
+                        'name' => 'Auto Created Dept ' . $deptCode,
+                        'status' => 'active'
+                    ]);
+                    $u['department_code'] = $newDept->code;
                 }
             }
 
