@@ -26,13 +26,16 @@ class MdHeatNumberController extends Controller
             ->groupBy('heat_date')
             ->orderBy('heat_date', 'desc');
 
-        // 🔒 Scoping: Admin Dept only sees their own department
+        // 🔒 Scoping: REMOVED as per request. All admins can see all heat numbers.
+        // This allows cross-department help (e.g. adminbubut uploading for another dept).
+        /*
         $user = auth()->user();
         if (!in_array($user->role, ['manager', 'direktur', 'mr'])) {
             $query->whereHas('item', function ($q) use ($user) {
                 $q->where('department_code', $user->department_code);
             });
         }
+        */
 
         if ($request->filled('month')) {
             $query->whereMonth('heat_date', $request->month);
@@ -54,13 +57,15 @@ class MdHeatNumberController extends Controller
     {
         $query = MdHeatNumber::whereDate('heat_date', $date);
 
-        // 🔒 Scoping: Admin Dept only sees their own department
+        // 🔒 Scoping: REMOVED.
+        /*
         $user = auth()->user();
         if (!in_array($user->role, ['manager', 'direktur', 'mr'])) {
             $query->whereHas('item', function ($q) use ($user) {
                 $q->where('department_code', $user->department_code);
             });
         }
+        */
 
         if ($request->filled('q')) {
             $q = $request->q;

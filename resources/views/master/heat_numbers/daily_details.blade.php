@@ -104,26 +104,28 @@
                 </div>
 
                 <div class="flex items-center gap-1">
-                    <a href="{{ route('master.heat-numbers.edit', $hn) }}"
-                        class="p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 transition-colors">
-                        <span class="material-icons-outlined">edit</span>
-                    </a>
-                    @if ($hn->status === 'active')
-                        <form action="{{ route('master.heat-numbers.deactivate', $hn) }}" method="POST" class="inline">
-                            @csrf @method('PATCH')
-                            <button type="submit"
-                                class="p-2 rounded-full hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors">
-                                <span class="material-icons-outlined">block</span>
-                            </button>
-                        </form>
-                    @else
-                        <form action="{{ route('master.heat-numbers.activate', $hn) }}" method="POST" class="inline">
-                            @csrf @method('PATCH')
-                            <button type="submit"
-                                class="p-2 rounded-full hover:bg-emerald-50 text-slate-400 hover:text-emerald-500 transition-colors">
-                                <span class="material-icons-outlined">check_circle</span>
-                            </button>
-                        </form>
+                    @if(in_array(auth()->user()->role, ['manager', 'direktur', 'mr']))
+                        <a href="{{ route('master.heat-numbers.edit', $hn) }}"
+                            class="p-2 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500 transition-colors">
+                            <span class="material-icons-outlined">edit</span>
+                        </a>
+                        @if ($hn->status === 'active')
+                            <form action="{{ route('master.heat-numbers.deactivate', $hn) }}" method="POST" class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit"
+                                    class="p-2 rounded-full hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors">
+                                    <span class="material-icons-outlined">block</span>
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('master.heat-numbers.activate', $hn) }}" method="POST" class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit"
+                                    class="p-2 rounded-full hover:bg-emerald-50 text-slate-400 hover:text-emerald-500 transition-colors">
+                                    <span class="material-icons-outlined">check_circle</span>
+                                </button>
+                            </form>
+                        @endif
                     @endif
                 </div>
             </div>
