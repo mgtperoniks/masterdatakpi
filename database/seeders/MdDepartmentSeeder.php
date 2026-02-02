@@ -20,10 +20,14 @@ class MdDepartmentSeeder extends Seeder
         ];
 
         foreach ($departments as $dept) {
+            // Ensure code is string
+            $dept['code'] = (string) $dept['code'];
+
             MdDepartment::updateOrCreate(
                 ['code' => $dept['code']],
                 $dept
             );
+            $this->command->info("Seeded Department: " . $dept['code']);
         }
     }
 }

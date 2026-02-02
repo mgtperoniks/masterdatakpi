@@ -58,6 +58,21 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $u) {
+            // Ensure department exists if specified
+            if (isset($u['department_code'])) {
+                $deptCode = (string) $u['department_code'];
+                $deptExists = \App\Models\MdDepartment::where('code', $deptCode)->exists();
+
+                if (!$deptExists) {
+                    $this->command->warn("Department code $deptCode missing for user {$u['name']}. Creating it now.");
+                    \App\Models\MdDepartment::create([
+                        'code' => $deptCode,
+                        'name' => 'Auto Created Dept ' . $deptCode,
+                        'status' => 'active'
+                    ]);
+                }
+            }
+
             User::updateOrCreate(
                 ['email' => $u['email']],
                 array_merge($u, [
