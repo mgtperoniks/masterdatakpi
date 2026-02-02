@@ -13,6 +13,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+
         $this->call([
             MdDepartmentSeeder::class,
             MdLineSeeder::class,
@@ -21,5 +23,7 @@ class DatabaseSeeder extends Seeder
             MdItemSeeder::class,
             UserSeeder::class,
         ]);
+
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
     }
 }
