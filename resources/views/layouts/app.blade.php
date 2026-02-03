@@ -17,7 +17,7 @@
 
     <!-- Manual Asset Linking for Production Stability -->
     <link rel="stylesheet" href="{{ asset('build/assets/app-BX-x7ToQ.css') }}">
-    <link rel="stylesheet" href="{{ asset('build/assets/app-CjBohu5y.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DANNFC48.css') }}">
     <link rel="stylesheet" href="{{ asset('build/assets/app-Cl8nAhUK.css') }}">
     <link rel="stylesheet" href="{{ asset('build/assets/app-DPSaFAjn.css') }}">
     <script src="{{ asset('build/assets/app-ChRD6PVr.js') }}" type="module"></script>
