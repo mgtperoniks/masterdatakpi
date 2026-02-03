@@ -26,7 +26,14 @@
         }
     </style>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+    <!-- Manual Asset Linking for Production Stability -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-BX-x7ToQ.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DANNFC48.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-Cl8nAhUK.css') }}">
+    <link rel="stylesheet" href="{{ asset('build/assets/app-DPSaFAjn.css') }}">
+    <script src="{{ asset('build/assets/app-ChRD6PVr.js') }}" type="module"></script>
+    <script src="{{ asset('build/assets/app-DHZHOunV.js') }}" type="module"></script>
 
     <style>
         body {
