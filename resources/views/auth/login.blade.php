@@ -35,10 +35,7 @@
         }
     </style>
 
-    {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
-    <!-- Manual Asset Linking for Production Stability -->
-    <link rel="stylesheet" href="{{ asset('build/assets/app-DANNFC48.css') }}">
-    <script src="{{ asset('build/assets/app-ChRD6PVr.js') }}" type="module"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body {
             font-family: 'Inter', sans-serif;
