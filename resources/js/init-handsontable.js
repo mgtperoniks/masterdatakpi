@@ -42,16 +42,20 @@ export function initializeHeatNumberImport() {
         const payload = [];
 
         // Clean and prepare data
+        // Clean and prepare data
         tableData.forEach(row => {
-            if (row[0] && row[1]) {
+            const heatNumber = (row[0] || '').toString().trim();
+            const itemCode = (row[1] || '').toString().trim();
+
+            if (heatNumber && itemCode) {
                 payload.push({
-                    heat_number: row[0],
-                    item_code: row[1],
-                    cor_qty: row[2],
-                    kode_produksi: row[3],
-                    size: row[4],
-                    customer: row[5],
-                    line: row[6]
+                    heat_number: heatNumber,
+                    item_code: itemCode,
+                    cor_qty: row[2] || 0,
+                    kode_produksi: row[3] || '',
+                    size: row[4] || '',
+                    customer: row[5] || '',
+                    line: row[6] || ''
                 });
             }
         });
