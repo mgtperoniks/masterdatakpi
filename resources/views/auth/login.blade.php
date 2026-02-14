@@ -59,7 +59,7 @@
                         class="h-24 mb-6 object-contain">
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight uppercase leading-tight">PT.
                         Peroni<br>Karya Sentra</h1>
-                    <div class="h-1 w-12 mt-4 mb-2" style="background:#059669"></div>
+                    <div class="h-1 w-12 mt-4 mb-2" style="background:#6366f1"></div>
                     <p class="text-slate-500 font-medium text-sm">Master Data System</p>
                 </div>
 
@@ -71,9 +71,9 @@
                         <label class="block text-sm font-bold text-slate-700">Email Address</label>
                         <div class="relative group">
                             <span
-                                class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors text-xl">mail</span>
+                                class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xl">mail</span>
                             <input type="email" name="email" required
-                                class="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all text-slate-900 font-medium placeholder:text-slate-400"
+                                class="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 transition-all text-slate-900 font-medium placeholder:text-slate-400"
                                 placeholder="name@peroniks.com" value="{{ old('email') }}">
                         </div>
                         @error('email')
@@ -85,9 +85,9 @@
                         <label class="block text-sm font-bold text-slate-700">Password</label>
                         <div class="relative group">
                             <span
-                                class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors text-xl">lock</span>
+                                class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xl">lock</span>
                             <input type="password" name="password" required
-                                class="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/10 transition-all text-slate-900 font-medium placeholder:text-slate-400"
+                                class="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 transition-all text-slate-900 font-medium placeholder:text-slate-400"
                                 placeholder="••••••••">
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                         <label class="flex items-center gap-3 cursor-pointer group">
                             <div class="relative flex items-center">
                                 <input type="checkbox" name="remember"
-                                    class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow-sm transition-all checked:border-emerald-600 checked:bg-emerald-600 hover:border-emerald-600 focus:ring-emerald-500/20">
+                                    class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 shadow-sm transition-all checked:border-indigo-600 checked:bg-indigo-600 hover:border-indigo-600 focus:ring-indigo-500/20">
                                 <span
                                     class="material-icons-round absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[16px] text-white opacity-0 peer-checked:opacity-100 pointer-events-none">done</span>
                             </div>
@@ -106,7 +106,7 @@
                         </label>
                     </div>
 
-                    <button type="submit" style="background:#047857"
+                    <button type="submit" style="background:#4338ca"
                         class="w-full h-14 text-white rounded-xl font-bold text-lg shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-3 hover:opacity-90">
                         <span>Sign In</span>
                         <span class="material-icons-round">arrow_forward</span>
@@ -131,16 +131,17 @@
 
             {{-- Strong Overlay for Text Readability --}}
             <div class="absolute inset-0 bg-gradient-to-r from-white/10 to-slate-900/80 mix-blend-multiply"></div>
-            <div class="absolute inset-0" style="background:rgba(6,78,59,0.2)"></div>
+            <div class="absolute inset-0" style="background:rgba(67,56,202,0.15)"></div>
 
             {{-- Floating Content --}}
             <div
                 class="absolute bottom-0 left-0 right-0 p-16 text-white bg-gradient-to-t from-slate-900/90 to-transparent">
                 <div class="max-w-xl">
-                    <div
-                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-sm mb-6" style="background:rgba(16,185,129,0.2);border:1px solid rgba(52,211,153,0.3)">
-                        <span class="w-2 h-2 rounded-full animate-pulse" style="background:#34d399"></span>
-                        <span class="text-xs font-bold uppercase tracking-wider" style="color:#d1fae5">System Online</span>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-sm mb-6"
+                        style="background:rgba(99,102,241,0.2);border:1px solid rgba(129,140,248,0.3)">
+                        <span class="w-2 h-2 rounded-full animate-pulse" style="background:#818cf8"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider" style="color:#e0e7ff">System
+                            Online</span>
                     </div>
                     <h2 class="text-4xl font-bold mb-4 tracking-tight leading-tight">Secure Master Data<br>& Centralized
                         Records</h2>
@@ -153,11 +154,11 @@
                     <div class="flex gap-8 mt-10 border-t border-white/10 pt-8">
                         <div>
                             <p class="text-3xl font-bold text-white">Central</p>
-                            <p class="text-xs uppercase tracking-wider mt-1" style="color:#a7f3d0">Database</p>
+                            <p class="text-xs uppercase tracking-wider mt-1" style="color:#c7d2fe">Database</p>
                         </div>
                         <div>
                             <p class="text-3xl font-bold text-white">Secure</p>
-                            <p class="text-xs uppercase tracking-wider mt-1" style="color:#a7f3d0">Access</p>
+                            <p class="text-xs uppercase tracking-wider mt-1" style="color:#c7d2fe">Access</p>
                         </div>
                     </div>
                 </div>

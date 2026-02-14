@@ -16,7 +16,8 @@
     $isHR = $scope === 'HR';
 @endphp
 
-<nav class="sidebar p-3">
+<nav class="sidebar p-3"
+    style="position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.15) transparent">
 
     <div class="sidebar-header mb-4">
         <h5 class="text-white mb-0">Master Data</h5>
