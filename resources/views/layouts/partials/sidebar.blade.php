@@ -67,7 +67,7 @@
         {{-- ITEMS (SUPER / PPIC / AUDITOR) --}}
         @if ($isSuper || (($isManager || $isAdmin) && $isPPIC) || $isAuditor)
             <li class="nav-item">
-                <a href="{{ route('master.items.index') }}"
+                <a href="{{ route('master.items.select') }}"
                     class="nav-link {{ request()->is('*/items*') ? 'active' : '' }}">
                     Items
                 </a>
@@ -75,7 +75,7 @@
 
             {{-- HEAT NUMBERS (SUPER / PPIC / AUDITOR) --}}
             <li class="nav-item">
-                <a href="{{ route('master.heat-numbers.index') }}"
+                <a href="{{ route('master.heat-numbers.select') }}"
                     class="nav-link {{ request()->is('*/heat-numbers*') ? 'active' : '' }}">
                     Heat Numbers
                 </a>

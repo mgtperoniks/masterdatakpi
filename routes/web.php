@@ -18,6 +18,7 @@ use App\Http\Controllers\Master\MdHeatNumberController;
 use App\Http\Controllers\Master\AuditLogController;
 use App\Http\Controllers\Master\ItemImportController;
 use App\Http\Controllers\Master\TrendAnalyticsController;
+use App\Http\Controllers\Master\MasterCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,11 +122,12 @@ Route::middleware(['auth', 'app_access'])->group(function () {
         | Items (CUSTOM ROUTE HARUS DI ATAS RESOURCE)
         |--------------------------------------------------------------------------
         */
-        Route::get('items/import', [ItemImportController::class, 'form'])
-            ->name('items.import.form');
+        Route::get('items/select', [MasterCategoryController::class, 'selectItems'])
+            ->name('items.select');
 
-        Route::post('items/import', [ItemImportController::class, 'import'])
-            ->name('items.import');
+        Route::get('/items/import', [ItemImportController::class, 'form'])->name('items.import.form');
+        Route::post('/items/import', [ItemImportController::class, 'import'])->name('items.import');
+        Route::post('/items/bulk-store', [ItemImportController::class, 'bulkStore'])->name('items.bulk-store');
 
         Route::patch('items/{item}/deactivate', [ItemController::class, 'deactivate'])
             ->name('items.deactivate');
@@ -163,6 +165,9 @@ Route::middleware(['auth', 'app_access'])->group(function () {
         | Heat Numbers
         |--------------------------------------------------------------------------
         */
+        Route::get('heat-numbers/select', [MasterCategoryController::class, 'selectHeatNumbers'])
+            ->name('heat-numbers.select');
+
         Route::controller(MdHeatNumberController::class)->prefix('heat-numbers')->name('heat-numbers.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/date/{date}', 'dailyDetails')->name('daily-details');

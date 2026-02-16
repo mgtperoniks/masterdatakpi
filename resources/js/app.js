@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import Handsontable from 'handsontable';
 import 'handsontable/dist/handsontable.full.min.css';
 
-import { initializeHeatNumberImport } from './init-handsontable';
+import { initializeHeatNumberImport, initializeItemImport } from './init-handsontable';
 
 window.Alpine = Alpine;
 window.Chart = Chart;
@@ -18,4 +18,5 @@ Alpine.start();
 // Initialize Handsontable if on the import page
 document.addEventListener('DOMContentLoaded', () => {
     initializeHeatNumberImport();
+    initializeItemImport();
 });

@@ -29,7 +29,7 @@ class ItemImportController extends Controller
         }
 
         $header = array_map(
-            fn ($h) => strtolower(trim($h)),
+            fn($h) => strtolower(trim($h)),
             array_shift($rows)
         );
 
@@ -53,7 +53,7 @@ class ItemImportController extends Controller
         }
 
         $inserted = 0;
-        $errors   = [];
+        $errors = [];
 
         foreach ($rows as $i => $row) {
 
@@ -63,11 +63,11 @@ class ItemImportController extends Controller
             }
 
             $data = array_combine($header, $row);
-            $data = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $data);
+            $data = array_map(fn($v) => is_string($v) ? trim($v) : $v, $data);
 
-            $code   = $data['code'] ?? '';
-            $name   = $data['name'] ?? '';
-            $dept   = $data['department_code'] ?? '';
+            $code = $data['code'] ?? '';
+            $name = $data['name'] ?? '';
+            $dept = $data['department_code'] ?? '';
             $status = strtolower($data['status'] ?? '');
 
             if ($code === '' || $name === '') {
@@ -100,16 +100,16 @@ class ItemImportController extends Controller
             }
 
             MdItem::create([
-                'code'            => $code,
-                'name'            => $name,
-                'aisi'            => $data['aisi'] ?? '',
-                'standard'        => $data['standard'] ?? '',
-                'unit_weight'     => is_numeric($data['unit_weight'])
+                'code' => $code,
+                'name' => $name,
+                'aisi' => $data['aisi'] ?? '',
+                'standard' => $data['standard'] ?? '',
+                'unit_weight' => is_numeric($data['unit_weight'])
                     ? (float) $data['unit_weight']
                     : null,
                 'department_code' => $dept,
-                'cycle_time_sec'  => (int) $data['cycle_time_sec'],
-                'status'          => $status,
+                'cycle_time_sec' => (int) $data['cycle_time_sec'],
+                'status' => $status,
             ]);
 
             $inserted++;
@@ -119,5 +119,76 @@ class ItemImportController extends Controller
             ->route('master.items.index')
             ->with('success', "Import selesai. {$inserted} item berhasil ditambahkan.")
             ->with('import_errors', $errors);
+    }
+
+    public function bulkStore(Request $request)
+    {
+        $request->validate([
+            'data' => 'required|array',
+        ]);
+
+        $rows = $request->data;
+        $inserted = 0;
+        $errors = [];
+
+        foreach ($rows as $i => $row) {
+            $code = trim($row['code'] ?? '');
+            $name = trim($row['name'] ?? '');
+            $aisi = trim($row['aisi'] ?? '');
+            $standard = trim($row['standard'] ?? '');
+            $unitWeight = $row['unit_weight'] ?? null;
+            $dept = trim($row['department_code'] ?? '');
+            $cycleTime = (int) ($row['cycle_time_sec'] ?? 0);
+            $status = strtolower(trim($row['status'] ?? 'active'));
+
+            if ($code === '' || $name === '') {
+                $errors[] = "Row " . ($i + 1) . ": Code or Name is empty.";
+                continue;
+            }
+
+            if (!MdDepartment::where('code', $dept)->exists()) {
+                $errors[] = "Row " . ($i + 1) . ": Invalid Department Code ({$dept}).";
+                continue;
+            }
+
+            if ($cycleTime <= 0) {
+                $errors[] = "Row " . ($i + 1) . ": Cycle time must be positive.";
+                continue;
+            }
+
+            if (!in_array($status, ['active', 'inactive'])) {
+                $errors[] = "Row " . ($i + 1) . ": Status must be 'active' or 'inactive'.";
+                continue;
+            }
+
+            // check duplicate if active
+            if ($status === 'active' && MdItem::where('code', $code)->where('status', 'active')->exists()) {
+                $errors[] = "Row " . ($i + 1) . ": Active item with code {$code} already exists.";
+                continue;
+            }
+
+            try {
+                MdItem::updateOrCreate(
+                    ['code' => $code, 'status' => $status],
+                    [
+                        'name' => $name,
+                        'aisi' => $aisi,
+                        'standard' => $standard,
+                        'unit_weight' => is_numeric($unitWeight) ? (float) $unitWeight : null,
+                        'department_code' => $dept,
+                        'cycle_time_sec' => $cycleTime
+                    ]
+                );
+                $inserted++;
+            } catch (\Exception $e) {
+                $errors[] = "Row " . ($i + 1) . ": Database error - " . $e->getMessage();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Import processed. {$inserted} items saved.",
+            'errors' => $errors
+        ]);
     }
 }

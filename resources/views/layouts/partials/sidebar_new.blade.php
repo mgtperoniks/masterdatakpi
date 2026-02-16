@@ -20,7 +20,7 @@
             <p class="text-white/20 text-[10px] uppercase font-bold px-4 tracking-widest">Management</p>
         </div>
 
-        <a href="{{ route('master.items.index') }}"
+        <a href="{{ route('master.items.select') }}"
             class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('master.items.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/5 hover:text-white' }}">
             <span class="material-icons">inventory_2</span>
             <span class="font-medium">Master Items</span>
@@ -50,7 +50,7 @@
             <span class="font-medium">Lines</span>
         </a>
 
-        <a href="{{ route('master.heat-numbers.index') }}"
+        <a href="{{ route('master.heat-numbers.select') }}"
             class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all {{ request()->routeIs('master.heat-numbers.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/5 hover:text-white' }}">
             <span class="material-icons">qr_code</span>
             <span class="font-medium">Heat Numbers</span>

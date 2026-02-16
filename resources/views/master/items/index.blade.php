@@ -9,11 +9,25 @@
     <header class="mb-6 lg:flex lg:justify-between lg:items-center">
         <div class="mb-4 lg:mb-0">
             <h1 class="text-2xl font-bold tracking-tight">Master Items</h1>
-            <p class="text-sm text-slate-500 dark:text-slate-400">Manage product specifications and item master data</p>
+            @if(request('department_code'))
+                @php
+                    $selDept = $departments->where('code', request('department_code'))->first();
+                @endphp
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-lg">{{ request('department_code') }}</span>
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ $selDept->name ?? 'Unknown Dept' }}</p>
+                    <a href="{{ route('master.items.select') }}" class="text-[10px] font-bold text-primary hover:underline ml-2 flex items-center gap-1">
+                        <span class="material-icons text-[12px]">sync</span>
+                        Ubah Kategori
+                    </a>
+                </div>
+            @else
+                <p class="text-sm text-slate-500 dark:text-slate-400">Manage product specifications and item master data</p>
+            @endif
         </div>
 
         <div class="flex gap-2">
-            <a href="{{ route('master.items.create') }}"
+            <a href="{{ route('master.items.create', ['department_code' => request('department_code')]) }}"
                 class="flex-1 lg:flex-none h-12 px-5 rounded-2xl bg-primary text-white shadow-lg shadow-primary/20 flex items-center justify-center gap-2 font-bold active:scale-95 transition-all">
                 <span class="material-icons text-lg">add</span>
                 Add New

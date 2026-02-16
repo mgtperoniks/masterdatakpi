@@ -155,3 +155,113 @@ export function initializeHeatNumberImport() {
         }
     };
 }
+
+export function initializeItemImport() {
+    const container = document.getElementById('item-grid-container');
+    const saveBtn = document.getElementById('saveItemBtn');
+
+    if (!container || !saveBtn) return;
+
+    const data = Array.from({ length: 30 }, () => ['', '', '', '', '', '', '', '']);
+
+    const hot = new Handsontable(container, {
+        data: data,
+        rowHeaders: true,
+        colHeaders: ['CODE', 'NAME', 'AISI', 'STANDARD', 'UNIT WEIGHT', 'DEPT CODE', 'CYCLE (SEC)', 'STATUS'],
+        height: '100%',
+        width: '100%',
+        licenseKey: 'non-commercial-and-evaluation',
+        stretchH: 'all',
+        columns: [
+            { data: 0, placeholder: '1.002.3' },      // Code
+            { data: 1, placeholder: 'Item Name' },    // Name
+            { data: 2, placeholder: 'AISI 304' },    // AISI
+            { data: 3, placeholder: 'Standard' },    // Standard
+            { data: 4, type: 'numeric' },            // Unit Weight
+            { data: 5, placeholder: '400.1' },       // Dept Code
+            { data: 6, type: 'numeric' },            // Cycle Time
+            { data: 7, type: 'dropdown', source: ['active', 'inactive'], defaultValue: 'active' }, // Status
+        ],
+        contextMenu: true,
+        autoWrapRow: true,
+        autoWrapCol: true,
+        minSpareRows: 5,
+    });
+
+    saveBtn.onclick = async () => {
+        const tableData = hot.getData();
+        const payload = [];
+
+        tableData.forEach(row => {
+            const code = (row[0] || '').toString().trim();
+            const name = (row[1] || '').toString().trim();
+
+            if (code && name) {
+                payload.push({
+                    code: code,
+                    name: name,
+                    aisi: row[2] || '',
+                    standard: row[3] || '',
+                    unit_weight: row[4],
+                    department_code: (row[5] || '').toString().trim(),
+                    cycle_time_sec: row[6] || 0,
+                    status: (row[7] || 'active').toString().trim().toLowerCase()
+                });
+            }
+        });
+
+        if (payload.length === 0) {
+            Swal.fire({ icon: 'info', title: 'No Data', text: 'Please enter valid data.', confirmButtonColor: '#2563EB' });
+            return;
+        }
+
+        const configDiv = document.getElementById('import-config');
+        const saveUrl = configDiv.dataset.saveUrl;
+        const redirectUrl = configDiv.dataset.redirectUrl;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="material-icons animate-spin">sync</span> Saving...';
+
+        try {
+            const response = await fetch(saveUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ data: payload })
+            });
+
+            if (!response.ok) throw new Error(`Server returned ${response.status}`);
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.errors && result.errors.length > 0) {
+                    Swal.fire({ icon: 'warning', title: 'Import with Warnings', text: result.message, confirmButtonColor: '#2563EB' });
+                    document.getElementById('errorLog').style.display = 'block';
+                    const errorList = document.getElementById('errorList');
+                    errorList.innerHTML = '';
+                    result.errors.forEach(err => {
+                        const li = document.createElement('li');
+                        li.textContent = err;
+                        errorList.appendChild(li);
+                    });
+                } else {
+                    Swal.fire({ icon: 'success', title: 'Success', text: result.message, confirmButtonColor: '#2563EB' })
+                        .then(() => window.location.href = redirectUrl);
+                }
+            } else {
+                throw new Error(result.message || 'Unknown error');
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire({ icon: 'error', title: 'Import Error', text: error.message, confirmButtonColor: '#2563EB' });
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<span class="material-icons">cloud_upload</span> Save Records';
+        }
+    };
+}

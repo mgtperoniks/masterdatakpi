@@ -45,6 +45,12 @@ class MdHeatNumberController extends Controller
             $query->whereYear('heat_date', $request->year);
         }
 
+        if ($request->filled('department_code')) {
+            $query->whereHas('item', function ($q) use ($request) {
+                $q->where('department_code', $request->department_code);
+            });
+        }
+
         $dailyBatches = $query->paginate(20)->withQueryString();
 
         return view('master.heat_numbers.index', compact('dailyBatches'));
@@ -78,6 +84,12 @@ class MdHeatNumberController extends Controller
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        if ($request->filled('department_code')) {
+            $query->whereHas('item', function ($q) use ($request) {
+                $q->where('department_code', $request->department_code);
+            });
         }
 
         $heatNumbers = $query->orderBy('created_at', 'desc')->paginate(50)->withQueryString();

@@ -9,11 +9,15 @@
     <header class="mb-6 lg:flex lg:justify-between lg:items-center">
         <div class="mb-4 lg:mb-0">
             <div class="flex items-center gap-2 mb-1">
-                <a href="{{ route('master.heat-numbers.index') }}"
+                <a href="{{ route('master.heat-numbers.index', ['department_code' => request('department_code')]) }}"
                     class="text-slate-400 hover:text-primary transition-colors">
                     <span class="material-icons text-xl">arrow_back</span>
                 </a>
                 <h1 class="text-2xl font-bold tracking-tight">{{ $heatDate->format('d F Y') }}</h1>
+                @if(request('department_code'))
+                    <span
+                        class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-lg ml-2">{{ request('department_code') }}</span>
+                @endif
             </div>
             <p class="text-sm text-slate-500 dark:text-slate-400 ml-8">Heat numbers recorded for this casting date</p>
         </div>
