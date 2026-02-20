@@ -20,11 +20,13 @@ class LineController extends Controller
     {
         $query = MdLine::with('department');
 
-        // 🔒 Scoping: Admin Dept only sees their own department
+        // 🔒 Scoping: REMOVED as per request. All admins can see all departments.
+        /*
         $user = auth()->user();
         if (!in_array($user->role, ['manager', 'direktur', 'mr'])) {
             $query->where('department_code', $user->department_code);
         }
+        */
 
         $lines = $query
             ->orderBy('code')

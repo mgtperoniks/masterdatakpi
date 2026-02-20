@@ -26,12 +26,19 @@ class OperatorController extends Controller
             });
         }
 
-        // 🔒 Scoping: Admin Dept only sees their own department
+        // 🔒 Scoping: REMOVED as per request. All admins can see all departments.
+        /*
         $user = auth()->user();
         if (!in_array($user->role, ['manager', 'direktur', 'mr'])) {
             $query->where('department_code', $user->department_code);
         } elseif ($request->filled('department_code')) {
             // Global roles can filter manually
+            $query->where('department_code', $request->department_code);
+        }
+        */
+
+        // Global roles and regular admins can filter manually
+        if ($request->filled('department_code')) {
             $query->where('department_code', $request->department_code);
         }
 
