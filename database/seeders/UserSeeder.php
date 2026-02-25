@@ -16,14 +16,14 @@ class UserSeeder extends Seeder
                 'email' => 'direktur@peroniks.com',
                 'role' => 'direktur',
                 'department_code' => '100', // Temporarily disabled to fix FK violation
-                'allowed_apps' => ['masterdata-kpi', 'kpi-bubut'],
+                'allowed_apps' => ['masterdata-kpi', 'kpi-bubut', 'kpi-netto'],
             ],
             [
                 'name' => 'MR',
                 'email' => 'mr@peroniks.com',
                 'role' => 'mr',
                 'department_code' => '100.1', // Temporarily disabled to fix FK violation
-                'allowed_apps' => ['masterdata-kpi', 'kpi-bubut'],
+                'allowed_apps' => ['masterdata-kpi', 'kpi-bubut', 'kpi-netto'],
             ],
             [
                 'name' => 'Manager PPIC',
