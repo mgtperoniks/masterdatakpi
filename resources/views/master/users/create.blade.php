@@ -132,6 +132,10 @@
                         <input type="checkbox" name="allowed_apps[]" value="kpi-netto" class="rounded border-slate-300 text-primary focus:ring-primary">
                         <span class="text-sm font-medium">KPI Netto</span>
                     </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="allowed_apps[]" value="kpi-lilin" class="rounded border-slate-300 text-primary focus:ring-primary">
+                        <span class="text-sm font-medium">KPI Lilin</span>
+                    </label>
                     <label class="flex items-center gap-2 cursor-pointer opacity-50">
                         <input type="checkbox" name="allowed_apps[]" value="kpi-gudang" class="rounded border-slate-300 text-primary focus:ring-primary" disabled title="Coming Soon">
                         <span class="text-sm font-medium">KPI Gudang (Soon)</span>

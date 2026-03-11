@@ -19,6 +19,16 @@
             </a>
         </header>
 
+        @if($errors->any())
+        <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+            <ul class="list-disc list-inside text-sm font-medium">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
         <form method="POST" action="{{ route('master.machines.update', $machine) }}" class="space-y-6">
             @csrf
             @method('PUT')
@@ -40,7 +50,7 @@
                                 <label
                                     class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 block">Machine
                                     Code</label>
-                                <input type="text" value="{{ $machine->code }}" readonly
+                                <input type="text" name="code" value="{{ $machine->code }}" readonly
                                     class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-900/50 border-none rounded-2xl text-sm text-slate-500 cursor-not-allowed outline-none shadow-sm transition-all">
                                 <p class="text-[9px] text-slate-400 mt-1 italic">Code cannot be changed.</p>
                             </div>
