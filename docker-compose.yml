@@ -6,6 +6,8 @@ services:
     ports:
       - "6001:80"
     env_file: .env
+    volumes:
+      - masterdatakpi-storage:/var/www/html/storage
     networks:
       - kpinet
 
@@ -25,7 +27,7 @@ services:
 
 volumes:
   db_data:
-
+  masterdatakpi-storage:
 
 networks:
   kpinet:

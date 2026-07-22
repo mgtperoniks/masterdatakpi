@@ -2,7 +2,7 @@
 FROM node:18 as frontend
 WORKDIR /app
 COPY package.json package-lock.json vite.config.js ./
-RUN npm install
+RUN npm ci
 COPY resources ./resources
 COPY public ./public
 RUN npm run build
