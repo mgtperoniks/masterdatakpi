@@ -11,6 +11,33 @@ use Illuminate\Validation\Rule;
 
 class MdHeatNumberController extends Controller
 {
+    public function searchApi(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+        if (strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = MdHeatNumber::with('item.department')
+            ->where('heat_number', 'like', "%{$q}%")
+            ->limit(15)
+            ->get();
+
+        return response()->json($results->map(function ($hn) {
+            return [
+                'id' => $hn->id,
+                'heat_number' => $hn->heat_number,
+                'item_name' => $hn->item_name,
+                'category' => $hn->item ? ($hn->item->department ? $hn->item->department->name : '-') : '-',
+                'department_code' => $hn->item ? $hn->item->department_code : '-',
+                'customer' => $hn->customer ?? '-',
+                'size' => $hn->size ?? '-',
+                'status' => $hn->status,
+                'edit_url' => route('master.heat-numbers.edit', $hn->id),
+            ];
+        }));
+    }
+
     /**
      * Display a listing of daily batches (grouped by heat_date).
      */

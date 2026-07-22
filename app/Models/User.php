@@ -53,6 +53,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function department()
+    {
+        return $this->belongsTo(MdDepartment::class, 'department_code', 'code');
+    }
+
     public function isReadOnly(): bool
     {
         return in_array($this->role, ['auditor', 'hr_admin', 'hr_manager', 'guest']);

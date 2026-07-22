@@ -4,10 +4,13 @@
 			"path": "../.."
 		},
 		{
+			"path": "../../../kpi-bubut"
+		},
+		{
 			"path": "../../../kpi-lilin"
 		},
 		{
-			"path": "../../../kpi-bubut"
+			"path": "../../../kpi-netto"
 		}
 	],
 	"settings": {}
