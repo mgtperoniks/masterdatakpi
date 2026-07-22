@@ -1,7 +1,7 @@
 # Stage 1: Build Frontend Assets
 FROM node:18 as frontend
 WORKDIR /app
-COPY package.json package-lock.json vite.config.js ./
+COPY package.json package-lock.json vite.config.js postcss.config.js tailwind.config.js ./
 RUN npm ci
 COPY resources ./resources
 COPY public ./public
